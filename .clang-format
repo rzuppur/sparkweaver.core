@@ -1,0 +1,37 @@
+---
+Language: Cpp
+BasedOnStyle: LLVM
+AccessModifierOffset: -4
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+AlignOperands: Align
+AlignTrailingComments: true
+AllowShortIfStatementsOnASingleLine: WithoutElse
+AlwaysBreakTemplateDeclarations: Yes
+BreakBeforeBraces: WebKit
+BreakConstructorInitializers: AfterColon
+ColumnLimit: 120
+PackConstructorInitializers: Never
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '<([A-Za-z0-9\Q/-_\E])+>'
+    Priority: 1
+  - Regex: '<([A-Za-z0-9.\Q/-_\E])+>'
+    Priority: 2
+  - Regex: '.*'
+    Priority: 3
+IncludeIsMainRegex: '([-_](test|unittest))?$'
+IndentWidth: 4
+InsertNewlineAtEOF: true
+MacroBlockBegin: ''
+MacroBlockEnd: ''
+NamespaceIndentation: All
+PointerAlignment: Left
+SpaceInEmptyParentheses: false
+SpacesInAngles: false
+SpacesInConditionalStatement: false
+SpacesInCStyleCastParentheses: false
+SpacesInParentheses: false
+TabWidth: 4
+FixNamespaceComments: false
+...
