@@ -57,7 +57,7 @@ namespace SparkWeaverCore {
         [[nodiscard]] virtual bool getTrigger(uint32_t tick, const Node* requested_by) noexcept { return false; }
 
         /**
-         * @brief Evaluate node tree and render it to a DMX data array.
+         * @brief Evaluate the node tree and render it to a DMX data array.
          *
          * @param tick Current tick number
          * @param p_dmx_data Pointer to 513 bytes long array corresponding to DMX addresses, first byte is unused

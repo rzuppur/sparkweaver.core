@@ -4,6 +4,7 @@
 
 #include <Node.h>
 #include <nodes/DsDmxRgb.h>
+#include <nodes/FxBreathe.h>
 #include <nodes/FxStrobe.h>
 #include <nodes/MxAdd.h>
 #include <nodes/MxSubtract.h>
@@ -14,15 +15,20 @@
 namespace SparkWeaverCore {
     namespace {
         template <std::size_t N>
-        [[nodiscard]] std::array<int, N> parseIntParams(const std::string& name, const std::vector<std::string>& params)
+        [[nodiscard]] std::array<uint16_t, N>
+        parseParams(const std::string& name, const std::vector<std::string>& params)
         {
             if (params.size() != N) {
                 throw InvalidTreeException(name + " invalid parameters");
             }
-            std::array<int, N> result = {};
+            std::array<uint16_t, N> result = {};
             try {
                 for (std::size_t i = 0; i < N; ++i) {
-                    result[i] = std::stoi(params[i]);
+                    const auto value = std::stoul(params[i]);
+                    if (value > std::numeric_limits<uint16_t>::max()) {
+                        throw InvalidTreeException(name + " parameter outside range");
+                    }
+                    result[i] = static_cast<uint16_t>(value);
                 }
             } catch ([[maybe_unused]] const std::exception& e) {
                 throw InvalidTreeException(name + " invalid parameters");
@@ -69,10 +75,10 @@ namespace SparkWeaverCore {
     {
         // CONNECTION
         if (command == "C" || command == "T") {
-            const auto [from, to] = parseIntParams<2>("Connection", params);
+            const auto [from, to] = parseParams<2>("Connection", params);
             if (from >= all_nodes.size() || to >= all_nodes.size()) {
-                throw InvalidTreeException("Connection " + std::to_string(from) + "-" + std::to_string(to) +
-                                           " out of range");
+                throw InvalidTreeException(
+                    "Connection " + std::to_string(from) + "-" + std::to_string(to) + " out of range");
             }
             if (command == "C") {
                 Node::connectColor(all_nodes.at(from), all_nodes.at(to));
@@ -83,15 +89,19 @@ namespace SparkWeaverCore {
 
         // DESTINATION
         else if (command == "DsDmxRgb") {
-            const auto [address] = parseIntParams<1>(command, params);
+            const auto [address] = parseParams<1>(command, params);
             auto* p_node         = new DsDmxRgb(address);
             all_nodes.push_back(p_node);
             root_nodes.push_back(p_node);
         }
 
         // EFFECT
-        else if (command == "FxStrobe") {
-            const auto [flash_length] = parseIntParams<1>(command, params);
+        else if (command == "FxBreathe") {
+            const auto [cycle_length, phase_offset, darken_amount] = parseParams<3>(command, params);
+            auto* p_node = new FxBreathe(cycle_length, phase_offset, darken_amount);
+            all_nodes.push_back(p_node);
+        } else if (command == "FxStrobe") {
+            const auto [flash_length] = parseParams<1>(command, params);
             auto* p_node              = new FxStrobe(flash_length);
             all_nodes.push_back(p_node);
         }
@@ -107,18 +117,18 @@ namespace SparkWeaverCore {
 
         // SOURCE
         else if (command == "SrColor") {
-            const auto [red, green, blue] = parseIntParams<3>(command, params);
+            const auto [red, green, blue] = parseParams<3>(command, params);
             auto* p_node                  = new SrColor(Color(red, green, blue));
             all_nodes.push_back(p_node);
         }
 
         // TRIGGER
         else if (command == "TrDelay") {
-            const auto [delay_time] = parseIntParams<1>(command, params);
+            const auto [delay_time] = parseParams<1>(command, params);
             auto* p_node            = new TrDelay(delay_time);
             all_nodes.push_back(p_node);
         } else if (command == "TrRandom") {
-            const auto [min_time, max_time] = parseIntParams<2>(command, params);
+            const auto [min_time, max_time] = parseParams<2>(command, params);
             auto* p_node                    = new TrRandom(min_time, max_time);
             all_nodes.push_back(p_node);
         }
@@ -157,6 +167,10 @@ namespace SparkWeaverCore {
         finishCommand();
     }
 
+    /**
+     * @brief Increment global clock and execute all nodes
+     * @return Pointer to 513 byte DMX data array output
+     */
     [[nodiscard]] uint8_t* Builder::tick() noexcept
     {
         time++;

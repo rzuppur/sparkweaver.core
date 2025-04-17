@@ -17,30 +17,34 @@ namespace SparkWeaverCore {
 
         constexpr Color operator+(const Color& other) const
         {
-            return {static_cast<uint8_t>(r > 0xFF - other.r ? 0xFF : r + other.r),
-                    static_cast<uint8_t>(g > 0xFF - other.g ? 0xFF : g + other.g),
-                    static_cast<uint8_t>(b > 0xFF - other.b ? 0xFF : b + other.b)};
+            return {
+                static_cast<uint8_t>(r > 0xFF - other.r ? 0xFF : r + other.r),
+                static_cast<uint8_t>(g > 0xFF - other.g ? 0xFF : g + other.g),
+                static_cast<uint8_t>(b > 0xFF - other.b ? 0xFF : b + other.b)};
         }
 
         constexpr Color operator-(const Color& other) const
         {
-            return {static_cast<uint8_t>(r < other.r ? 0x00 : r - other.r),
-                    static_cast<uint8_t>(g < other.g ? 0x00 : g - other.g),
-                    static_cast<uint8_t>(b < other.b ? 0x00 : b - other.b)};
+            return {
+                static_cast<uint8_t>(r < other.r ? 0x00 : r - other.r),
+                static_cast<uint8_t>(g < other.g ? 0x00 : g - other.g),
+                static_cast<uint8_t>(b < other.b ? 0x00 : b - other.b)};
         }
 
         constexpr Color operator*(const Color& other) const
         {
-            return {static_cast<uint8_t>(std::min(255, static_cast<int>(r) * static_cast<int>(other.r) / 255)),
-                    static_cast<uint8_t>(std::min(255, static_cast<int>(g) * static_cast<int>(other.g) / 255)),
-                    static_cast<uint8_t>(std::min(255, static_cast<int>(b) * static_cast<int>(other.b) / 255))};
+            return {
+                static_cast<uint8_t>(std::min(0xFF, static_cast<int>(r) * static_cast<int>(other.r) / 0xFF)),
+                static_cast<uint8_t>(std::min(0xFF, static_cast<int>(g) * static_cast<int>(other.g) / 0xFF)),
+                static_cast<uint8_t>(std::min(0xFF, static_cast<int>(b) * static_cast<int>(other.b) / 0xFF))};
         }
 
-        constexpr Color operator*(const double factor) const
+        constexpr Color operator*(const float factor) const
         {
-            return {static_cast<uint8_t>(std::min(255.0, r * factor)),
-                    static_cast<uint8_t>(std::min(255.0, g * factor)),
-                    static_cast<uint8_t>(std::min(255.0, b * factor))};
+            return {
+                static_cast<uint8_t>(std::min(static_cast<float>(0xFF), static_cast<float>(r) * factor)),
+                static_cast<uint8_t>(std::min(static_cast<float>(0xFF), static_cast<float>(g) * factor)),
+                static_cast<uint8_t>(std::min(static_cast<float>(0xFF), static_cast<float>(b) * factor))};
         }
     };
 

@@ -7,8 +7,8 @@
 namespace SparkWeaverCore {
     class FxStrobe final : public Node {
         const uint16_t flash_length;
-        uint32_t       flash_tick = UINT32_MAX;
 
+        uint32_t flash_tick  = UINT32_MAX;
         uint32_t cache_tick  = UINT32_MAX;
         Color    cache_color = Colors::BLACK;
 
