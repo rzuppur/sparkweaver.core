@@ -9,6 +9,7 @@
 #include <nodes/MxAdd.h>
 #include <nodes/MxSubtract.h>
 #include <nodes/SrColor.h>
+#include <nodes/TrCycle.h>
 #include <nodes/TrDelay.h>
 #include <nodes/TrRandom.h>
 
@@ -123,7 +124,11 @@ namespace SparkWeaverCore {
         }
 
         // TRIGGER
-        else if (command == "TrDelay") {
+        else if (command == "TrCycle") {
+            const auto [cycle_length, phase_offset] = parseParams<2>(command, params);
+            auto* p_node                            = new TrCycle(cycle_length, phase_offset);
+            all_nodes.push_back(p_node);
+        } else if (command == "TrDelay") {
             const auto [delay_time] = parseParams<1>(command, params);
             auto* p_node            = new TrDelay(delay_time);
             all_nodes.push_back(p_node);
