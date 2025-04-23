@@ -4,7 +4,6 @@
 #include <cstdint>
 
 #include <Node.h>
-#include <bits/locale_classes.h>
 
 namespace SparkWeaverCore {
     class FxBreathe final : public Node {

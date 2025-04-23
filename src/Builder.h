@@ -24,7 +24,7 @@ namespace SparkWeaverCore {
         void                     parseTreeCommand(const std::string& command, const std::vector<std::string>& params);
 
     public:
-        /** @throws InvalidTreeException if tree contains errors */
+        /** @throws InvalidTreeException if the tree contains errors */
         void build(const std::string& tree);
 
         [[nodiscard]] uint8_t* tick() noexcept;
