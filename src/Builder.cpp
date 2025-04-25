@@ -1,6 +1,7 @@
 #include "Builder.h"
 
 #include <array>
+#include <cstring>
 
 #include <Node.h>
 #include <nodes/DsDmxRgb.h>
@@ -174,10 +175,11 @@ namespace SparkWeaverCore {
 
     /**
      * @brief Increment global clock and execute all nodes
-     * @return Pointer to 513 byte DMX data array output
+     * @return Pointer to 513 bytes long DMX data array output, byte number corresponds to DMX address, 0 is unused
      */
     [[nodiscard]] uint8_t* Builder::tick() noexcept
     {
+        memset(dmx_data, 0, sizeof(dmx_data));
         time++;
         for (const auto root_node : root_nodes) {
             root_node->render(time, dmx_data);
