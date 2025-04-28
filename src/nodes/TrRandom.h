@@ -11,7 +11,7 @@ namespace SparkWeaverCore {
         uint32_t next_trigger;
 
         explicit TrRandom(const uint16_t min_time, const uint16_t max_time) :
-            Node("TrRandom", 0, false, 0, true),
+            Node(NodeConfig("TrRandom", "Trigger random", 0, 0, false, true)),
             min_time(min_time),
             max_time(max_time)
         {

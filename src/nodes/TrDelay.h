@@ -11,7 +11,7 @@ namespace SparkWeaverCore {
         size_t            head = 0;
 
         explicit TrDelay(const uint16_t delay_ticks) :
-            Node("TrDelay", 0, false, INPUTS_UNLIMITED, true),
+            Node(NodeConfig("TrDelay", "Delay trigger", 0, INPUTS_UNLIMITED, false, true)),
             delay_ticks(delay_ticks)
         {
             buffer.resize(delay_ticks, false);

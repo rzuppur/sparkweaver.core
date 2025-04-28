@@ -19,7 +19,7 @@ namespace SparkWeaverCore {
 
     public:
         explicit FxStrobe(const uint16_t flash_length) :
-            Node("FxStrobe", 1, true, INPUTS_UNLIMITED, false),
+            Node(NodeConfig("FxStrobe", "Strobe effect", 1, INPUTS_UNLIMITED, true, false)),
             flash_length(flash_length)
         {
         }

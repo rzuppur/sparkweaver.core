@@ -147,6 +147,7 @@ namespace SparkWeaverCore {
 
     void Builder::build(const std::string& tree)
     {
+        time = 0;
         resetNodeTree();
         clearCommandBuffer();
 

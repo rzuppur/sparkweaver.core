@@ -8,7 +8,7 @@ namespace SparkWeaverCore {
         Color color;
 
         explicit SrColor(const Color color) :
-            Node("SrColor", 0, true, 0, false),
+            Node(NodeConfig("SrColor", "Color", 0, 0, true, false)),
             color(color)
         {
         }

@@ -11,42 +11,60 @@ namespace SparkWeaverCore {
     constexpr int DMX_PACKET_SIZE  = 513;
     constexpr int INPUTS_UNLIMITED = 32;
 
+    struct NodeConfig {
+        const std::string name;
+        const std::string title;
+        const uint8_t     max_color_inputs;
+        const uint8_t     max_trigger_inputs;
+        const bool        enable_color_outputs;
+        const bool        enable_trigger_outputs;
+
+        NodeConfig() = delete;
+
+        NodeConfig(
+            std::string   name,
+            std::string   title,
+            const uint8_t max_color_inputs,
+            const uint8_t max_trigger_inputs,
+            const bool    enable_color_outputs,
+            const bool    enable_trigger_outputs) :
+            name(std::move(name)),
+            title(std::move(title)),
+            max_color_inputs(max_color_inputs),
+            max_trigger_inputs(max_trigger_inputs),
+            enable_color_outputs(enable_color_outputs),
+            enable_trigger_outputs(enable_trigger_outputs)
+        {
+        }
+    };
+
     class Node {
     protected:
-        std::string name;
-
         // COLOR IN
-        uint8_t            max_color_inputs;
         std::vector<Node*> color_inputs;
         void               addColorInput(Node* input);
 
         // COLOR OUT
-        bool               enable_color_outputs;
         std::vector<Node*> color_outputs;
         [[nodiscard]] int  getColorOutputIndex(const Node* to) const noexcept;
         void               addColorOutput(Node* output);
 
         // TRIGGER IN
-        uint8_t            max_trigger_inputs;
         std::vector<Node*> trigger_inputs;
         void               addTriggerInput(Node* input);
 
         // TRIGGER OUT
-        bool               enable_trigger_outputs;
         std::vector<Node*> trigger_outputs;
         [[nodiscard]] int  getTriggerOutputIndex(const Node* to) const noexcept;
         void               addTriggerOutput(Node* output);
 
     public:
+        const NodeConfig config;
+
         Node() = delete;
 
-        Node(const std::string_view name, const uint8_t max_color_inputs, const bool enable_color_outputs,
-             const uint8_t max_trigger_inputs, const bool enable_trigger_outputs) :
-            name(name),
-            max_color_inputs(max_color_inputs),
-            enable_color_outputs(enable_color_outputs),
-            max_trigger_inputs(max_trigger_inputs),
-            enable_trigger_outputs(enable_trigger_outputs)
+        explicit Node(NodeConfig config) :
+            config(std::move(config))
         {
         }
 

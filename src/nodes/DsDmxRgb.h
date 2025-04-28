@@ -8,11 +8,11 @@ namespace SparkWeaverCore {
 
     public:
         explicit DsDmxRgb(const uint16_t address) :
-            Node("DsDmxRgb", 1, true, 0, false),
+            Node(NodeConfig("DsDmxRgb", "RGB fixture", 1, 0, false, false)),
             address(address)
         {
             if (address + 2 >= DMX_PACKET_SIZE) {
-                throw InvalidParameterException(name, "DMX address out of range");
+                throw InvalidParameterException(config.name, "DMX address out of range");
             }
         }
 

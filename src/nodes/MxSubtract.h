@@ -6,7 +6,7 @@ namespace SparkWeaverCore {
     class MxSubtract final : public Node {
     public:
         MxSubtract() :
-            Node("MxSubtract", INPUTS_UNLIMITED, true, 0, false)
+            Node(NodeConfig("MxSubtract", "Subtract", INPUTS_UNLIMITED, 0, true, false))
         {
         }
 

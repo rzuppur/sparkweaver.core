@@ -16,16 +16,16 @@ namespace SparkWeaverCore {
 
     public:
         FxBreathe(const uint16_t cycle_length, const uint16_t phase_offset, const uint8_t darken_amount) :
-            Node("FxBreathe", 1, true, 0, false),
+            Node(NodeConfig("FxBreathe", "Breathe effect", 1, 0, true, false)),
             cycle_length(cycle_length),
             phase_offset(phase_offset),
             darken_amount(static_cast<float>(darken_amount) / 0xFF)
         {
             if (cycle_length == 0) {
-                throw InvalidParameterException(name, "cycle_length must be greater than 0");
+                throw InvalidParameterException(config.name, "cycle_length must be greater than 0");
             }
             if (darken_amount < 0 || darken_amount > 0xFF) {
-                throw InvalidParameterException(name, "darken_amount must be between 0 and 1");
+                throw InvalidParameterException(config.name, "darken_amount must be between 0 and 255");
             }
         }
 

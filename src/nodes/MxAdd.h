@@ -6,7 +6,7 @@ namespace SparkWeaverCore {
     class MxAdd final : public Node {
     public:
         MxAdd() :
-            Node("MxAdd", INPUTS_UNLIMITED, true, 0, false)
+            Node(NodeConfig("MxAdd", "Add", INPUTS_UNLIMITED, 0, true, false))
         {
         }
 

@@ -10,7 +10,7 @@ namespace SparkWeaverCore {
         uint16_t phase_offset;
 
         explicit TrCycle(const uint16_t cycle_length, const uint16_t phase_offset) :
-            Node("TrCycle", 0, false, 0, true),
+            Node(NodeConfig("TrCycle", "Cycle trigger", 0, 0, false, true)),
             cycle_length(cycle_length),
             phase_offset(phase_offset)
         {
