@@ -1,18 +1,17 @@
-#include "Builder.h"
-
 #include <array>
 #include <cstring>
 
-#include <Node.h>
-#include <nodes/DsDmxRgb.h>
-#include <nodes/FxBreathe.h>
-#include <nodes/FxStrobe.h>
-#include <nodes/MxAdd.h>
-#include <nodes/MxSubtract.h>
-#include <nodes/SrColor.h>
-#include <nodes/TrCycle.h>
-#include <nodes/TrDelay.h>
-#include <nodes/TrRandom.h>
+#include "Node.h"
+#include "SparkWeaverCore.h"
+#include "nodes/DsDmxRgb.h"
+#include "nodes/FxBreathe.h"
+#include "nodes/FxStrobe.h"
+#include "nodes/MxAdd.h"
+#include "nodes/MxSubtract.h"
+#include "nodes/SrColor.h"
+#include "nodes/TrCycle.h"
+#include "nodes/TrDelay.h"
+#include "nodes/TrRandom.h"
 
 namespace SparkWeaverCore {
     namespace {

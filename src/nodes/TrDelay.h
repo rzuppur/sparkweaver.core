@@ -1,18 +1,21 @@
 #pragma once
 
-#include <Node.h>
+#include "../Node.h"
 
 namespace SparkWeaverCore {
     class TrDelay final : public Node {
     public:
+        static const NodeConfig config;
+
+        [[nodiscard]] const NodeConfig& getConfig() override { return config; }
+
         uint16_t          delay_ticks;
         uint32_t          last_tick = 0;
         std::vector<bool> buffer;
         size_t            head = 0;
 
-        explicit TrDelay(const uint16_t delay_ticks) :
-            Node(NodeConfig("TrDelay", "Delay trigger", 0, INPUTS_UNLIMITED, false, true)),
-            delay_ticks(delay_ticks)
+        explicit TrDelay(const uint16_t delay_ticks)
+            : delay_ticks(delay_ticks)
         {
             buffer.resize(delay_ticks, false);
         }
@@ -32,4 +35,6 @@ namespace SparkWeaverCore {
             return buffer[head];
         }
     };
+
+    inline const NodeConfig TrDelay::config = NodeConfig("TrDelay", "Delay trigger", 0, INPUTS_UNLIMITED, false, true);
 }

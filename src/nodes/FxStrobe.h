@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-#include <Node.h>
+#include "../Node.h"
 
 namespace SparkWeaverCore {
     class FxStrobe final : public Node {
@@ -18,9 +18,12 @@ namespace SparkWeaverCore {
         }
 
     public:
-        explicit FxStrobe(const uint16_t flash_length) :
-            Node(NodeConfig("FxStrobe", "Strobe effect", 1, INPUTS_UNLIMITED, true, false)),
-            flash_length(flash_length)
+        static const NodeConfig config;
+
+        [[nodiscard]] const NodeConfig& getConfig() override { return config; }
+
+        explicit FxStrobe(const uint16_t flash_length)
+            : flash_length(flash_length)
         {
         }
 
@@ -42,4 +45,6 @@ namespace SparkWeaverCore {
             return cache_color;
         }
     };
+
+    inline const NodeConfig FxStrobe::config = NodeConfig("FxStrobe", "Strobe effect", 1, INPUTS_UNLIMITED, true, false);
 }

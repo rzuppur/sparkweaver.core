@@ -1,45 +1,49 @@
 #pragma once
 
+#include <array>
 #include <cstdint>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include <Color.h>
+#include "Color.h"
+#include "utils/string.h"
 
 namespace SparkWeaverCore {
     constexpr int DMX_PACKET_SIZE  = 513;
     constexpr int INPUTS_UNLIMITED = 32;
 
     struct NodeConfig {
-        const std::string name;
-        const std::string title;
-        const uint8_t     max_color_inputs;
-        const uint8_t     max_trigger_inputs;
-        const bool        enable_color_outputs;
-        const bool        enable_trigger_outputs;
+        std::array<char, 32> title{};
+        std::array<char, 16> name{};
+        const uint8_t        max_color_inputs;
+        const uint8_t        max_trigger_inputs;
+        const bool           enable_color_outputs;
+        const bool           enable_trigger_outputs;
 
         NodeConfig() = delete;
 
-        NodeConfig(
-            std::string   name,
-            std::string   title,
-            const uint8_t max_color_inputs,
-            const uint8_t max_trigger_inputs,
-            const bool    enable_color_outputs,
-            const bool    enable_trigger_outputs) :
-            name(std::move(name)),
-            title(std::move(title)),
-            max_color_inputs(max_color_inputs),
-            max_trigger_inputs(max_trigger_inputs),
-            enable_color_outputs(enable_color_outputs),
-            enable_trigger_outputs(enable_trigger_outputs)
+        constexpr NodeConfig(
+            const std::string_view _name,
+            const std::string_view _title,
+            const uint8_t          max_color_inputs,
+            const uint8_t          max_trigger_inputs,
+            const bool             enable_color_outputs,
+            const bool             enable_trigger_outputs)
+            : max_color_inputs(max_color_inputs)
+            , max_trigger_inputs(max_trigger_inputs)
+            , enable_color_outputs(enable_color_outputs)
+            , enable_trigger_outputs(enable_trigger_outputs)
         {
+            copyStringToArray(_name, name);
+            copyStringToArray(_title, title);
         }
     };
 
     class Node {
     protected:
+        static inline NodeConfig default_config{"Node", "Node", 0, 0, false, false};
+
         // COLOR IN
         std::vector<Node*> color_inputs;
         void               addColorInput(Node* input);
@@ -59,16 +63,11 @@ namespace SparkWeaverCore {
         void               addTriggerOutput(Node* output);
 
     public:
-        const NodeConfig config;
-
-        Node() = delete;
-
-        explicit Node(NodeConfig config) :
-            config(std::move(config))
-        {
-        }
-
         virtual ~Node() = default;
+
+        [[nodiscard]] virtual const NodeConfig& getConfig() { return default_config; }
+
+        [[nodiscard]] std::string getName() { return {getConfig().name.data()}; }
 
         [[nodiscard]] virtual Color getColor(uint32_t tick, const Node* requested_by) noexcept { return Colors::BLACK; }
 
@@ -93,8 +92,8 @@ namespace SparkWeaverCore {
         std::string message;
 
     public:
-        explicit InvalidConnectionException(const std::string& nodeName, const std::string& errorMessage) :
-            message("Invalid connection to " + nodeName + ": " + errorMessage)
+        explicit InvalidConnectionException(const std::string& nodeName, const std::string& errorMessage)
+            : message("Invalid connection to " + nodeName + ": " + errorMessage)
         {
         }
 
@@ -105,8 +104,8 @@ namespace SparkWeaverCore {
         std::string message;
 
     public:
-        explicit InvalidParameterException(const std::string& nodeName, const std::string& errorMessage) :
-            message("Invalid parameter for " + nodeName + ": " + errorMessage)
+        explicit InvalidParameterException(const std::string& nodeName, const std::string& errorMessage)
+            : message("Invalid parameter for " + nodeName + ": " + errorMessage)
         {
         }
 
@@ -117,13 +116,13 @@ namespace SparkWeaverCore {
         std::string message;
 
     public:
-        explicit InvalidTreeException(std::string errorMessage) :
-            message(std::move(errorMessage))
+        explicit InvalidTreeException(std::string errorMessage)
+            : message(std::move(errorMessage))
         {
         }
 
-        InvalidTreeException() :
-            message("Invalid node tree structure")
+        InvalidTreeException()
+            : message("Invalid node tree structure")
         {
         }
 

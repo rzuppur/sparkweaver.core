@@ -1,14 +1,15 @@
 #pragma once
 
-#include <Node.h>
+#include "../Node.h"
 
 namespace SparkWeaverCore {
     class MxSubtract final : public Node {
     public:
-        MxSubtract() :
-            Node(NodeConfig("MxSubtract", "Subtract", INPUTS_UNLIMITED, 0, true, false))
-        {
-        }
+        static const NodeConfig config;
+
+        [[nodiscard]] const NodeConfig& getConfig() override { return config; }
+
+        MxSubtract() {}
 
         [[nodiscard]] Color getColor(const uint32_t time, const Node* requested_by) noexcept override
         {
@@ -22,4 +23,6 @@ namespace SparkWeaverCore {
             return Colors::BLACK;
         }
     };
+
+    inline const NodeConfig MxSubtract::config = NodeConfig("MxSubtract", "Subtract", INPUTS_UNLIMITED, 0, true, false);
 }

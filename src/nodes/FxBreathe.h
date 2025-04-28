@@ -3,7 +3,7 @@
 #include <cmath>
 #include <cstdint>
 
-#include <Node.h>
+#include "../Node.h"
 
 namespace SparkWeaverCore {
     class FxBreathe final : public Node {
@@ -15,17 +15,20 @@ namespace SparkWeaverCore {
         Color    cache_color = Colors::BLACK;
 
     public:
-        FxBreathe(const uint16_t cycle_length, const uint16_t phase_offset, const uint8_t darken_amount) :
-            Node(NodeConfig("FxBreathe", "Breathe effect", 1, 0, true, false)),
-            cycle_length(cycle_length),
-            phase_offset(phase_offset),
-            darken_amount(static_cast<float>(darken_amount) / 0xFF)
+        static const NodeConfig config;
+
+        [[nodiscard]] const NodeConfig& getConfig() override { return config; }
+
+        FxBreathe(const uint16_t cycle_length, const uint16_t phase_offset, const uint8_t darken_amount)
+            : cycle_length(cycle_length)
+            , phase_offset(phase_offset)
+            , darken_amount(static_cast<float>(darken_amount) / 0xFF)
         {
             if (cycle_length == 0) {
-                throw InvalidParameterException(config.name, "cycle_length must be greater than 0");
+                throw InvalidParameterException(getName(), "cycle_length must be greater than 0");
             }
             if (darken_amount < 0 || darken_amount > 0xFF) {
-                throw InvalidParameterException(config.name, "darken_amount must be between 0 and 255");
+                throw InvalidParameterException(getName(), "darken_amount must be between 0 and 255");
             }
         }
 
@@ -45,4 +48,6 @@ namespace SparkWeaverCore {
             return cache_color;
         }
     };
+
+    inline const NodeConfig FxBreathe::config = NodeConfig("FxBreathe", "Breathe effect", 1, 0, true, false);
 }

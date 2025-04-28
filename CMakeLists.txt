@@ -10,3 +10,7 @@ add_library(sparkweaver_core
 target_include_directories(sparkweaver_core
         PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
         PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+add_executable(sparkweaver_core_test test/demo.cpp)
+
+target_link_libraries(sparkweaver_core_test PRIVATE sparkweaver_core)

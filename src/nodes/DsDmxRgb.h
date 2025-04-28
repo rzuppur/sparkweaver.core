@@ -1,18 +1,21 @@
 #pragma once
 
-#include <Node.h>
+#include "../Node.h"
 
 namespace SparkWeaverCore {
     class DsDmxRgb final : public Node {
         uint16_t address;
 
     public:
-        explicit DsDmxRgb(const uint16_t address) :
-            Node(NodeConfig("DsDmxRgb", "RGB fixture", 1, 0, false, false)),
-            address(address)
+        static const NodeConfig config;
+
+        [[nodiscard]] const NodeConfig& getConfig() override { return config; }
+
+        explicit DsDmxRgb(const uint16_t address)
+            : address(address)
         {
             if (address + 2 >= DMX_PACKET_SIZE) {
-                throw InvalidParameterException(config.name, "DMX address out of range");
+                throw InvalidParameterException(getName(), "DMX address out of range");
             }
         }
 
@@ -24,4 +27,6 @@ namespace SparkWeaverCore {
             p_dmx_data[address + 2] = blue;
         }
     };
+
+    inline const NodeConfig DsDmxRgb::config = NodeConfig("DsDmxRgb", "DMX RGB", 1, 0, true, false);
 }

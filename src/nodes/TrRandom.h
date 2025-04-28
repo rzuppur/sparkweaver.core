@@ -1,19 +1,22 @@
 #pragma once
 
-#include <Node.h>
-#include <utils/random.h>
+#include "../Node.h"
+#include "../utils/random.h"
 
 namespace SparkWeaverCore {
     class TrRandom final : public Node {
     public:
+        static const NodeConfig config;
+
+        [[nodiscard]] const NodeConfig& getConfig() override { return config; }
+
         uint16_t min_time;
         uint16_t max_time;
         uint32_t next_trigger;
 
-        explicit TrRandom(const uint16_t min_time, const uint16_t max_time) :
-            Node(NodeConfig("TrRandom", "Trigger random", 0, 0, false, true)),
-            min_time(min_time),
-            max_time(max_time)
+        explicit TrRandom(const uint16_t min_time, const uint16_t max_time)
+            : min_time(min_time)
+            , max_time(max_time)
         {
             next_trigger = random(min_time, max_time);
         }
@@ -28,4 +31,6 @@ namespace SparkWeaverCore {
             return false;
         }
     };
+
+    inline const NodeConfig TrRandom::config = NodeConfig("TrRandom", "Trigger random", 0, 0, false, true);
 }

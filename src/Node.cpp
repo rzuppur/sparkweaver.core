@@ -6,10 +6,10 @@ namespace SparkWeaverCore {
 
     void Node::addColorInput(Node* const input)
     {
-        if (config.max_color_inputs > color_inputs.size()) {
+        if (getConfig().max_color_inputs > color_inputs.size()) {
             color_inputs.push_back(input);
         } else {
-            throw InvalidConnectionException(config.name, "max_color_inputs exceeded");
+            throw InvalidConnectionException(getName(), "max_color_inputs exceeded");
         }
     }
 
@@ -25,10 +25,10 @@ namespace SparkWeaverCore {
 
     void Node::addColorOutput(Node* const output)
     {
-        if (config.enable_color_outputs) {
+        if (getConfig().enable_color_outputs) {
             color_outputs.push_back(output);
         } else {
-            throw InvalidConnectionException(config.name, "color_outputs disabled");
+            throw InvalidConnectionException(getName(), "color_outputs disabled");
         }
     }
 
@@ -36,10 +36,10 @@ namespace SparkWeaverCore {
 
     void Node::addTriggerInput(Node* const input)
     {
-        if (config.max_trigger_inputs > trigger_inputs.size()) {
+        if (getConfig().max_trigger_inputs > trigger_inputs.size()) {
             trigger_inputs.push_back(input);
         } else {
-            throw InvalidConnectionException(config.name, "max_trigger_inputs exceeded");
+            throw InvalidConnectionException(getName(), "max_trigger_inputs exceeded");
         }
     }
 
@@ -55,10 +55,10 @@ namespace SparkWeaverCore {
 
     void Node::addTriggerOutput(Node* const output)
     {
-        if (config.enable_trigger_outputs) {
+        if (getConfig().enable_trigger_outputs) {
             trigger_outputs.push_back(output);
         } else {
-            throw InvalidConnectionException(config.name, "trigger_outputs disabled");
+            throw InvalidConnectionException(getName(), "trigger_outputs disabled");
         }
     }
 

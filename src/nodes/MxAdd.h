@@ -1,14 +1,15 @@
 #pragma once
 
-#include <Node.h>
+#include "../Node.h"
 
 namespace SparkWeaverCore {
     class MxAdd final : public Node {
     public:
-        MxAdd() :
-            Node(NodeConfig("MxAdd", "Add", INPUTS_UNLIMITED, 0, true, false))
-        {
-        }
+        static const NodeConfig config;
+
+        [[nodiscard]] const NodeConfig& getConfig() override { return config; }
+
+        MxAdd() {}
 
         [[nodiscard]] Color getColor(const uint32_t time, const Node* requested_by) noexcept override
         {
@@ -19,4 +20,6 @@ namespace SparkWeaverCore {
             return sum;
         }
     };
+
+    inline const NodeConfig MxAdd::config = NodeConfig("MxAdd", "Add", INPUTS_UNLIMITED, 0, true, false);
 }

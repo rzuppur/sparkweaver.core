@@ -13,7 +13,7 @@ AlwaysBreakTemplateDeclarations: Yes
 BinPackArguments: false
 BinPackParameters: OnePerLine
 BreakBeforeBraces: WebKit
-BreakConstructorInitializers: AfterColon
+BreakConstructorInitializers: BeforeComma
 ColumnLimit: 120
 PackConstructorInitializers: Never
 IncludeBlocks: Regroup
