@@ -6,26 +6,21 @@
 
 namespace SparkWeaverCore {
     class FxStrobe final : public Node {
-        const uint16_t flash_length;
-
         uint32_t flash_tick  = UINT32_MAX;
         uint32_t cache_tick  = UINT32_MAX;
         Color    cache_color = Colors::BLACK;
 
         [[nodiscard]] bool flashActive(const uint32_t tick) const
         {
-            return tick >= flash_tick && tick < flash_tick + flash_length && flash_tick != UINT32_MAX;
+            return tick >= flash_tick && tick < flash_tick + getParam(0) && flash_tick != UINT32_MAX;
         }
 
     public:
         static const NodeConfig config;
 
-        [[nodiscard]] const NodeConfig& getConfig() override { return config; }
+        [[nodiscard]] const NodeConfig& getConfig() const noexcept override { return config; }
 
-        explicit FxStrobe(const uint16_t flash_length)
-            : flash_length(flash_length)
-        {
-        }
+        FxStrobe() { init(); }
 
         [[nodiscard]] Color getColor(const uint32_t tick, const Node* requested_by) noexcept override
         {
@@ -46,5 +41,6 @@ namespace SparkWeaverCore {
         }
     };
 
-    inline const NodeConfig FxStrobe::config = NodeConfig("FxStrobe", "Strobe effect", 1, INPUTS_UNLIMITED, true, false);
+    constexpr NodeConfig FxStrobe::config =
+        NodeConfig("FxStrobe", "Strobe effect", 1, INPUTS_UNLIMITED, true, false, {{"flash_length", 1, 0xFFFF, 1}});
 }

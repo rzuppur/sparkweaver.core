@@ -7,33 +7,22 @@
 
 namespace SparkWeaverCore {
     class FxBreathe final : public Node {
-        const uint16_t cycle_length;
-        const uint16_t phase_offset;
-        const float    darken_amount;
-
         uint32_t cache_tick  = UINT32_MAX;
         Color    cache_color = Colors::BLACK;
 
     public:
         static const NodeConfig config;
 
-        [[nodiscard]] const NodeConfig& getConfig() override { return config; }
+        [[nodiscard]] const NodeConfig& getConfig() const noexcept override { return config; }
 
-        FxBreathe(const uint16_t cycle_length, const uint16_t phase_offset, const uint8_t darken_amount)
-            : cycle_length(cycle_length)
-            , phase_offset(phase_offset)
-            , darken_amount(static_cast<float>(darken_amount) / 0xFF)
-        {
-            if (cycle_length == 0) {
-                throw InvalidParameterException(getName(), "cycle_length must be greater than 0");
-            }
-            if (darken_amount < 0 || darken_amount > 0xFF) {
-                throw InvalidParameterException(getName(), "darken_amount must be between 0 and 255");
-            }
-        }
+        FxBreathe() { init(); }
 
         [[nodiscard]] Color getColor(const uint32_t tick, const Node* requested_by) noexcept override
         {
+            const uint16_t cycle_length  = getParam(0);
+            const uint16_t phase_offset  = getParam(1);
+            const float    darken_amount = static_cast<float>(getParam(2)) / 0xFF;
+
             if (tick != cache_tick) {
                 cache_tick = tick;
                 if (!color_inputs.empty()) {
@@ -49,5 +38,16 @@ namespace SparkWeaverCore {
         }
     };
 
-    inline const NodeConfig FxBreathe::config = NodeConfig("FxBreathe", "Breathe effect", 1, 0, true, false);
+    constexpr NodeConfig FxBreathe::config = NodeConfig(
+        "FxBreathe",
+        "Breathe effect",
+        1,
+        0,
+        true,
+        false,
+        {
+            {"cycle_length", 1, 0xFFFF, 400},
+            {"phase_offset", 0, 0xFFFF, 0},
+            {"darken_amount", 0, 0xFF, 0xFF},
+        });
 }

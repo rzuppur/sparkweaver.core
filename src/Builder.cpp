@@ -15,23 +15,57 @@
 
 namespace SparkWeaverCore {
     namespace {
-        template <std::size_t N>
-        [[nodiscard]] std::array<uint16_t, N>
-        parseParams(const std::string& name, const std::vector<std::string>& params)
+        const auto node_configs = getNodeConfigs();
+
+        const NodeConfig* getConfig(const std::string_view node_key)
         {
-            if (params.size() != N) {
-                throw InvalidTreeException(name + " invalid parameters");
+            for (const auto& config : node_configs) {
+                if (std::string_view(config.name.data()) == node_key) {
+                    return &config;
+                }
             }
-            std::array<uint16_t, N> result = {};
+            return nullptr;
+        }
+
+        using NodeCtor = Node* (*)();
+        struct NodeFactory {
+            std::string_view key;
+            NodeCtor         make;
+        };
+
+        Node* makeNode(const std::string_view node_key)
+        {
+            static const std::vector<NodeFactory> node_registry{
+                {DsDmxRgb::config.name.data(), []() -> Node* { return new DsDmxRgb(); }},
+                {FxBreathe::config.name.data(), []() -> Node* { return new FxBreathe(); }},
+                {FxStrobe::config.name.data(), []() -> Node* { return new FxStrobe(); }},
+                {MxAdd::config.name.data(), []() -> Node* { return new MxAdd(); }},
+                {MxSubtract::config.name.data(), []() -> Node* { return new MxSubtract(); }},
+                {SrColor::config.name.data(), []() -> Node* { return new SrColor(); }},
+                {TrCycle::config.name.data(), []() -> Node* { return new TrCycle(); }},
+                {TrDelay::config.name.data(), []() -> Node* { return new TrDelay(); }},
+                {TrRandom::config.name.data(), []() -> Node* { return new TrRandom(); }}};
+
+            for (const auto& [key, make] : node_registry) {
+                if (key == node_key) {
+                    return make();
+                }
+            }
+            return nullptr;
+        }
+
+        [[nodiscard]] std::vector<uint16_t> parseParams(const std::string& name, const std::vector<std::string>& params)
+        {
+            std::vector<uint16_t> result(params.size());
             try {
-                for (std::size_t i = 0; i < N; ++i) {
+                for (std::size_t i = 0; i < params.size(); ++i) {
                     const auto value = std::stoul(params[i]);
-                    if (value > std::numeric_limits<uint16_t>::max()) {
+                    if (value > UINT16_MAX) {
                         throw InvalidTreeException(name + " parameter outside range");
                     }
                     result[i] = static_cast<uint16_t>(value);
                 }
-            } catch ([[maybe_unused]] const std::exception& e) {
+            } catch (...) {
                 throw InvalidTreeException(name + " invalid parameters");
             }
             return result;
@@ -76,7 +110,12 @@ namespace SparkWeaverCore {
     {
         // CONNECTION
         if (command == "C" || command == "T") {
-            const auto [from, to] = parseParams<2>("Connection", params);
+            if (params.size() != 2) {
+                throw InvalidTreeException(command + " invalid parameters");
+            }
+            const auto parsed_params = parseParams("Connection", params);
+            const auto from          = parsed_params.at(0);
+            const auto to            = parsed_params.at(1);
             if (from >= all_nodes.size() || to >= all_nodes.size()) {
                 throw InvalidTreeException(
                     "Connection " + std::to_string(from) + "-" + std::to_string(to) + " out of range");
@@ -88,58 +127,24 @@ namespace SparkWeaverCore {
             }
         }
 
-        // DESTINATION
-        else if (command == "DsDmxRgb") {
-            const auto [address] = parseParams<1>(command, params);
-            auto* p_node         = new DsDmxRgb(address);
+        // NODE
+        else if (const auto config = getConfig(command)) {
+            if (params.size() != config->params_count) {
+                throw InvalidTreeException(command + " invalid parameters");
+            }
+            const auto parsed_params = parseParams(command, params);
+            const auto p_node        = makeNode(command);
+            if (!p_node) {
+                throw InvalidTreeException(command + " not found");
+            }
+            for (size_t i = 0; i < parsed_params.size(); i++) {
+                p_node->setParam(i, parsed_params[i]);
+            }
             all_nodes.push_back(p_node);
-            root_nodes.push_back(p_node);
-        }
-
-        // EFFECT
-        else if (command == "FxBreathe") {
-            const auto [cycle_length, phase_offset, darken_amount] = parseParams<3>(command, params);
-            auto* p_node = new FxBreathe(cycle_length, phase_offset, darken_amount);
-            all_nodes.push_back(p_node);
-        } else if (command == "FxStrobe") {
-            const auto [flash_length] = parseParams<1>(command, params);
-            auto* p_node              = new FxStrobe(flash_length);
-            all_nodes.push_back(p_node);
-        }
-
-        // MIX
-        else if (command == "MxAdd") {
-            auto* p_node = new MxAdd();
-            all_nodes.push_back(p_node);
-        } else if (command == "MxSubtract") {
-            auto* p_node = new MxSubtract();
-            all_nodes.push_back(p_node);
-        }
-
-        // SOURCE
-        else if (command == "SrColor") {
-            const auto [red, green, blue] = parseParams<3>(command, params);
-            auto* p_node                  = new SrColor(Color(red, green, blue));
-            all_nodes.push_back(p_node);
-        }
-
-        // TRIGGER
-        else if (command == "TrCycle") {
-            const auto [cycle_length, phase_offset] = parseParams<2>(command, params);
-            auto* p_node                            = new TrCycle(cycle_length, phase_offset);
-            all_nodes.push_back(p_node);
-        } else if (command == "TrDelay") {
-            const auto [delay_time] = parseParams<1>(command, params);
-            auto* p_node            = new TrDelay(delay_time);
-            all_nodes.push_back(p_node);
-        } else if (command == "TrRandom") {
-            const auto [min_time, max_time] = parseParams<2>(command, params);
-            auto* p_node                    = new TrRandom(min_time, max_time);
-            all_nodes.push_back(p_node);
-        }
-
-        // ERROR
-        else {
+            if (!config->enable_color_outputs && !config->enable_trigger_outputs) {
+                root_nodes.push_back(p_node);
+            }
+        } else {
             throw InvalidTreeException("Unknown command: " + command);
         }
     }
@@ -150,27 +155,32 @@ namespace SparkWeaverCore {
         resetNodeTree();
         clearCommandBuffer();
 
-        for (const char c : tree) {
-            if (c == '\n') {
-                finishCommand();
-            } else if (c == ' ') {
-                if (buffer_command.empty()) {
-                    throw InvalidTreeException();
-                }
-                if (buffer_command_parsed) {
-                    closeParam();
+        try {
+            for (const char c : tree) {
+                if (c == '\n') {
+                    finishCommand();
+                } else if (c == ' ') {
+                    if (buffer_command.empty()) {
+                        throw InvalidTreeException();
+                    }
+                    if (buffer_command_parsed) {
+                        closeParam();
+                    } else {
+                        buffer_command_parsed = true;
+                    }
                 } else {
-                    buffer_command_parsed = true;
-                }
-            } else {
-                if (buffer_command_parsed) {
-                    buffer_current_param.push_back(c);
-                } else {
-                    buffer_command.push_back(c);
+                    if (buffer_command_parsed) {
+                        buffer_current_param.push_back(c);
+                    } else {
+                        buffer_command.push_back(c);
+                    }
                 }
             }
+            finishCommand();
+        } catch (...) {
+            resetNodeTree();
+            throw;
         }
-        finishCommand();
     }
 
     /**

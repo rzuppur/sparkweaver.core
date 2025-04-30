@@ -16,7 +16,7 @@ All nodes extend a common Node class and configure the allowed combination of in
 
 - Node tree must be a directed acyclic graph.
 - Nodes run in ticks evaluated from the destination node.
-- Nodes must evaluate all inputs every tick. **_Skipping ticks breaks delays!_**
+- Nodes must evaluate all inputs at every tick. **_Skipping ticks breaks delays!_**
 - Tick length is not defined but assumed to be around 24ms, the time it takes to send one full 512 byte DMX packet. That's about 42 FPS. You can have faster updates by sending less than 512 bytes.
 
 ## Tree format
@@ -45,7 +45,7 @@ Triggers are boolean signals, can be used to trigger effects.
 
 ### Example
 
-Creates a red (255 0 0) color input node (index 0), connects it's color output to DMX fixture (index 1) at address 50.
+Creates a red (255 0 0) color input node (index 0), connects its color output to DMX fixture (index 1) at address 50.
 
 ```
 SrColor 255 0 0

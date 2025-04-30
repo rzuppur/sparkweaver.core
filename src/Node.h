@@ -1,7 +1,9 @@
 #pragma once
 
 #include <array>
+#include <cassert>
 #include <cstdint>
+#include <iostream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -12,38 +14,77 @@
 namespace SparkWeaverCore {
     constexpr int DMX_PACKET_SIZE  = 513;
     constexpr int INPUTS_UNLIMITED = 32;
+    constexpr int NODE_PARAMS_MAX  = 8;
+
+    struct NodeParam {
+        std::array<char, 16> name{};
+        uint16_t             min;
+        uint16_t             max;
+        uint16_t             default_value;
+
+        constexpr NodeParam()
+            : min(0)
+            , max(0)
+            , default_value(0)
+        {
+        }
+
+        constexpr NodeParam(
+            const std::string_view _name,
+            const uint16_t         min,
+            const uint16_t         max,
+            const uint16_t         default_value)
+            : min(min)
+            , max(max)
+            , default_value(default_value)
+        {
+            copyStringToArray(_name, name);
+        }
+    };
 
     struct NodeConfig {
-        std::array<char, 32> title{};
-        std::array<char, 16> name{};
-        const uint8_t        max_color_inputs;
-        const uint8_t        max_trigger_inputs;
-        const bool           enable_color_outputs;
-        const bool           enable_trigger_outputs;
+        std::array<char, 24>                   title{};
+        std::array<char, 16>                   name{};
+        std::array<NodeParam, NODE_PARAMS_MAX> params{};
+        const uint8_t                          params_count;
+        const uint8_t                          max_color_inputs;
+        const uint8_t                          max_trigger_inputs;
+        const bool                             enable_color_outputs;
+        const bool                             enable_trigger_outputs;
 
         NodeConfig() = delete;
 
         constexpr NodeConfig(
-            const std::string_view _name,
-            const std::string_view _title,
-            const uint8_t          max_color_inputs,
-            const uint8_t          max_trigger_inputs,
-            const bool             enable_color_outputs,
-            const bool             enable_trigger_outputs)
-            : max_color_inputs(max_color_inputs)
+            const std::string_view                 _name,
+            const std::string_view                 _title,
+            const uint8_t                          max_color_inputs,
+            const uint8_t                          max_trigger_inputs,
+            const bool                             enable_color_outputs,
+            const bool                             enable_trigger_outputs,
+            const std::initializer_list<NodeParam> _params)
+            : params_count(_params.size())
+            , max_color_inputs(max_color_inputs)
             , max_trigger_inputs(max_trigger_inputs)
             , enable_color_outputs(enable_color_outputs)
             , enable_trigger_outputs(enable_trigger_outputs)
         {
             copyStringToArray(_name, name);
             copyStringToArray(_title, title);
+            assert(params_count <= NODE_PARAMS_MAX);
+            auto _params_it = _params.begin();
+            for (size_t i = 0; _params_it != _params.end(); ++i) {
+                params[i] = *_params_it;
+                std::advance(_params_it, 1);
+            }
         }
     };
 
     class Node {
-    protected:
-        static inline NodeConfig default_config{"Node", "Node", 0, 0, false, false};
+        static inline NodeConfig default_config{"Node", "Empty node", 0, 0, false, false, {}};
 
+        std::array<uint16_t, NODE_PARAMS_MAX> params{};
+
+    protected:
         // COLOR IN
         std::vector<Node*> color_inputs;
         void               addColorInput(Node* input);
@@ -65,9 +106,37 @@ namespace SparkWeaverCore {
     public:
         virtual ~Node() = default;
 
-        [[nodiscard]] virtual const NodeConfig& getConfig() { return default_config; }
+        /**
+         * @brief Sets up parameters. Should be called in every derived class constructor.
+         */
+        void init() noexcept
+        {
+            auto const& config = getConfig();
+            for (size_t i = 0; i < config.params_count; i++) {
+                params[i] = config.params[i].default_value;
+            }
+        }
 
-        [[nodiscard]] std::string getName() { return {getConfig().name.data()}; }
+        [[nodiscard]] uint16_t getParam(const size_t n) const noexcept
+        {
+            if (n >= getConfig().params_count) return 0;
+            return params[n];
+        }
+
+        void setParam(const size_t n, const uint16_t value) noexcept
+        {
+            const auto config = getConfig();
+            if (n >= config.params_count) return;
+            if (value < config.params[n].min || value > config.params[n].max) return;
+            params[n] = value;
+        }
+
+        /**
+         * @brief Should be overridden by derived class to return the correct configuration
+         */
+        [[nodiscard]] virtual const NodeConfig& getConfig() const noexcept { return default_config; }
+
+        [[nodiscard]] std::string getName() const noexcept { return {getConfig().name.data()}; }
 
         [[nodiscard]] virtual Color getColor(uint32_t tick, const Node* requested_by) noexcept { return Colors::BLACK; }
 
@@ -92,7 +161,7 @@ namespace SparkWeaverCore {
         std::string message;
 
     public:
-        explicit InvalidConnectionException(const std::string& nodeName, const std::string& errorMessage)
+        InvalidConnectionException(const std::string& nodeName, const std::string& errorMessage)
             : message("Invalid connection to " + nodeName + ": " + errorMessage)
         {
         }
@@ -104,7 +173,7 @@ namespace SparkWeaverCore {
         std::string message;
 
     public:
-        explicit InvalidParameterException(const std::string& nodeName, const std::string& errorMessage)
+        InvalidParameterException(const std::string& nodeName, const std::string& errorMessage)
             : message("Invalid parameter for " + nodeName + ": " + errorMessage)
         {
         }

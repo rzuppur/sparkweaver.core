@@ -7,9 +7,9 @@ namespace SparkWeaverCore {
     public:
         static const NodeConfig config;
 
-        [[nodiscard]] const NodeConfig& getConfig() override { return config; }
+        [[nodiscard]] const NodeConfig& getConfig() const noexcept override { return config; }
 
-        MxAdd() {}
+        MxAdd() { init(); }
 
         [[nodiscard]] Color getColor(const uint32_t time, const Node* requested_by) noexcept override
         {
@@ -21,5 +21,5 @@ namespace SparkWeaverCore {
         }
     };
 
-    inline const NodeConfig MxAdd::config = NodeConfig("MxAdd", "Add", INPUTS_UNLIMITED, 0, true, false);
+    constexpr NodeConfig MxAdd::config = NodeConfig("MxAdd", "Add", INPUTS_UNLIMITED, 0, true, false, {});
 }

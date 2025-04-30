@@ -7,22 +7,19 @@ namespace SparkWeaverCore {
     public:
         static const NodeConfig config;
 
-        [[nodiscard]] const NodeConfig& getConfig() override { return config; }
+        [[nodiscard]] const NodeConfig& getConfig() const noexcept override { return config; }
 
-        uint16_t          delay_ticks;
-        uint32_t          last_tick = 0;
-        std::vector<bool> buffer;
-        size_t            head = 0;
+        uint32_t          last_tick = UINT32_MAX;
+        std::vector<bool> buffer    = {false};
+        size_t            head      = 0;
 
-        explicit TrDelay(const uint16_t delay_ticks)
-            : delay_ticks(delay_ticks)
-        {
-            buffer.resize(delay_ticks, false);
-        }
+        TrDelay() { init(); }
 
         [[nodiscard]] bool getTrigger(const uint32_t tick, const Node* requested_by) noexcept override
         {
             if (tick != last_tick) {
+                const size_t delay_ticks = getParam(0);
+                if (buffer.size() != delay_ticks) buffer.resize(delay_ticks, false);
                 last_tick    = tick;
                 buffer[head] = false;
                 for (const auto& trigger : trigger_inputs) {
@@ -36,5 +33,6 @@ namespace SparkWeaverCore {
         }
     };
 
-    inline const NodeConfig TrDelay::config = NodeConfig("TrDelay", "Delay trigger", 0, INPUTS_UNLIMITED, false, true);
+    constexpr NodeConfig TrDelay::config =
+        NodeConfig("TrDelay", "Delay trigger", 0, INPUTS_UNLIMITED, false, true, {{"delay_ticks", 1, 0xFF, 40}});
 }

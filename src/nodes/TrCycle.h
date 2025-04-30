@@ -8,22 +8,24 @@ namespace SparkWeaverCore {
     public:
         static const NodeConfig config;
 
-        [[nodiscard]] const NodeConfig& getConfig() override { return config; }
+        [[nodiscard]] const NodeConfig& getConfig() const noexcept override { return config; }
 
-        uint16_t cycle_length;
-        uint16_t phase_offset;
-
-        explicit TrCycle(const uint16_t cycle_length, const uint16_t phase_offset)
-            : cycle_length(cycle_length)
-            , phase_offset(phase_offset)
-        {
-        }
+        TrCycle() { init(); }
 
         [[nodiscard]] bool getTrigger(const uint32_t tick, const Node* requested_by) noexcept override
         {
+            const uint16_t cycle_length = getParam(0);
+            const uint16_t phase_offset = getParam(1);
             return (tick + phase_offset) % cycle_length == 0;
         }
     };
 
-    inline const NodeConfig TrCycle::config = NodeConfig("TrCycle", "Cycle trigger", 0, 0, false, true);
+    constexpr NodeConfig TrCycle::config = NodeConfig(
+        "TrCycle",
+        "Cycle trigger",
+        0,
+        0,
+        false,
+        true,
+        {{"cycle_length", 1, 0xFFFF, 40}, {"phase_offset", 0, 0xFFFF, 0}});
 }
