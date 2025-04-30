@@ -31,7 +31,7 @@ int main()
             std::cout << std::format(
                 " {} {:<16} {:<12} [{}]\n",
                 i == config.params_count - 1 ? "└─" : "├─",
-                std::string(param.name.data()) + ":",
+                param.name.data(),
                 std::format("{}-{}", param.min, param.max),
                 param.default_value);
         }

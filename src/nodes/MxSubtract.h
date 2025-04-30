@@ -25,5 +25,5 @@ namespace SparkWeaverCore {
     };
 
     constexpr NodeConfig MxSubtract::config =
-        NodeConfig("MxSubtract", "Subtract", INPUTS_UNLIMITED, 0, true, false, {});
+        NodeConfig("MxSubtract", "Mix subtract", INPUTS_UNLIMITED, 0, true, false, {});
 }

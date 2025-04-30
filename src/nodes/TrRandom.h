@@ -16,20 +16,18 @@ namespace SparkWeaverCore {
 
         [[nodiscard]] bool getTrigger(const uint32_t tick, const Node* requested_by) noexcept override
         {
-            if (tick >= next_trigger || next_trigger == UINT32_MAX) {
-                const uint16_t min_time    = getParam(0);
-                const uint16_t max_time    = getParam(1);
-                const bool     trigger_now = tick == next_trigger;
-                next_trigger               = tick + random(min_time, max_time);
-                return trigger_now;
+            if (tick > next_trigger || next_trigger == UINT32_MAX) {
+                const uint16_t min_time = getParam(0);
+                const uint16_t max_time = getParam(1);
+                next_trigger            = tick + random(min_time, max_time);
             }
-            return false;
+            return tick == next_trigger;
         }
     };
 
     constexpr NodeConfig TrRandom::config = NodeConfig(
         "TrRandom",
-        "Trigger random",
+        "Random trigger",
         0,
         0,
         false,
