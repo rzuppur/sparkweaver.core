@@ -12,6 +12,8 @@ Created to run simple lighting setups using only a ESP32 hooked directly to DMX.
 
 For editing and simulating node trees, see [SparkWeaver Web](https://github.com/rzuppur/sparkweaver.web) UI. It provides easy editor to create node trees and visualize them using WebAssembly to run this core library.
 
+![Screenshot of node based DMX lightning editor user interface](screen_web.jpg)
+
 ---
 
 ## Running on a microcontroller
