@@ -1,6 +1,6 @@
 # SparkWeaver Core
 
-Node-based lightning system for controlling DMX fixtures.
+Node-based lighting system for controlling DMX fixtures.
 
 ## Node name prefixes
 
