@@ -3,15 +3,6 @@
 
 #include "Node.h"
 #include "SparkWeaverCore.h"
-#include "nodes/DsDmxRgb.h"
-#include "nodes/FxBreathe.h"
-#include "nodes/FxStrobe.h"
-#include "nodes/MxAdd.h"
-#include "nodes/MxSubtract.h"
-#include "nodes/SrColor.h"
-#include "nodes/TrCycle.h"
-#include "nodes/TrDelay.h"
-#include "nodes/TrRandom.h"
 
 namespace SparkWeaverCore {
     namespace {
@@ -38,6 +29,7 @@ namespace SparkWeaverCore {
             static const std::vector<NodeFactory> node_registry{
                 {DsDmxRgb::config.name.data(), []() -> Node* { return new DsDmxRgb(); }},
                 {FxBreathe::config.name.data(), []() -> Node* { return new FxBreathe(); }},
+                {FxPulse::config.name.data(), []() -> Node* { return new FxPulse(); }},
                 {FxStrobe::config.name.data(), []() -> Node* { return new FxStrobe(); }},
                 {MxAdd::config.name.data(), []() -> Node* { return new MxAdd(); }},
                 {MxSubtract::config.name.data(), []() -> Node* { return new MxSubtract(); }},
@@ -190,10 +182,10 @@ namespace SparkWeaverCore {
     [[nodiscard]] uint8_t* Builder::tick() noexcept
     {
         memset(dmx_data, 0, sizeof(dmx_data));
-        time++;
         for (const auto root_node : root_nodes) {
             root_node->render(time, dmx_data);
         }
+        time++;
         return dmx_data;
     }
 }

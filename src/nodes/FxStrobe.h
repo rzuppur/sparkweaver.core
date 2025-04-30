@@ -10,11 +10,6 @@ namespace SparkWeaverCore {
         uint32_t cache_tick  = UINT32_MAX;
         Color    cache_color = Colors::BLACK;
 
-        [[nodiscard]] bool flashActive(const uint32_t tick) const
-        {
-            return tick >= flash_tick && tick < flash_tick + getParam(0) && flash_tick != UINT32_MAX;
-        }
-
     public:
         static const NodeConfig config;
 
@@ -31,10 +26,12 @@ namespace SparkWeaverCore {
                         flash_tick = tick;
                     }
                 }
-                if (flashActive(tick) && !color_inputs.empty()) {
+
+                cache_color = Colors::BLACK;
+
+                if (!color_inputs.empty() && flash_tick != UINT32_MAX && tick >= flash_tick &&
+                    tick < flash_tick + getParam(0)) {
                     cache_color = color_inputs.at(0)->getColor(tick, this);
-                } else {
-                    cache_color = Colors::BLACK;
                 }
             }
             return cache_color;

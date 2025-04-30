@@ -17,8 +17,8 @@ namespace SparkWeaverCore {
         [[nodiscard]] bool getTrigger(const uint32_t tick, const Node* requested_by) noexcept override
         {
             if (tick > next_trigger || next_trigger == UINT32_MAX) {
-                const uint16_t min_time = getParam(0);
-                const uint16_t max_time = getParam(1);
+                const uint16_t min_time = getParam(0) - 1;
+                const uint16_t max_time = getParam(1) - 1;
                 next_trigger            = tick + random(min_time, max_time);
             }
             return tick == next_trigger;

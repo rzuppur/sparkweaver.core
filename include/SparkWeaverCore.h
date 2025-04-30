@@ -6,6 +6,7 @@
 #include "../src/Node.h"
 #include "../src/nodes/DsDmxRgb.h"
 #include "../src/nodes/FxBreathe.h"
+#include "../src/nodes/FxPulse.h"
 #include "../src/nodes/FxStrobe.h"
 #include "../src/nodes/MxAdd.h"
 #include "../src/nodes/MxSubtract.h"
@@ -20,6 +21,7 @@ namespace SparkWeaverCore {
         return {
             DsDmxRgb::config,
             FxBreathe::config,
+            FxPulse::config,
             FxStrobe::config,
             MxAdd::config,
             MxSubtract::config,

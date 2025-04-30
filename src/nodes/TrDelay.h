@@ -17,9 +17,9 @@ namespace SparkWeaverCore {
 
         [[nodiscard]] bool getTrigger(const uint32_t tick, const Node* requested_by) noexcept override
         {
+            const auto delay = getParam(0) + 1;
             if (tick != last_tick) {
-                const size_t delay_ticks = getParam(0);
-                if (buffer.size() != delay_ticks) buffer.resize(delay_ticks, false);
+                if (buffer.size() != delay) buffer.resize(delay + 2, false);
                 last_tick    = tick;
                 buffer[head] = false;
                 for (const auto& trigger : trigger_inputs) {
@@ -27,7 +27,7 @@ namespace SparkWeaverCore {
                         buffer[head] = true;
                     }
                 }
-                head = (head + 1) % delay_ticks;
+                head = (head + 1) % delay;
             }
             return buffer[head];
         }
