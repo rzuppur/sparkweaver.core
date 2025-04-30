@@ -2,9 +2,59 @@
 
 Node-based lighting system for controlling DMX fixtures.
 
-## Node name prefixes
+### Motivation
 
-All nodes extend a common Node class and configure the allowed combination of inputs and triggers. For ease of use, however, this naming convention should be followed.
+Created to run simple lighting setups using only a ESP32 hooked directly to DMX. The core library contains no platform-specific code, see below for implementations.
+
+---
+
+## Web interface
+
+For editing and simulating node trees, see [SparkWeaver Web](https://github.com/rzuppur/sparkweaver.web) UI. It provides easy editor to create node trees and visualize them using WebAssembly to run this core library.
+
+---
+
+## Running on a microcontroller
+
+To send DMX signals from an ESP32, Arduino or similar microcontroller, you need a DMX shield or build your own using a chip like the MAX485. Inexpensive DMX shields with XLR connectors already attached are the easiest option. There isn’t one definitive guide to recommend, so please search the web to find more info relevant to your use case.
+
+### Incomplete example of SparkWeaver on an ESP32
+
+```c++
+#include <esp_dmx.h>
+#include <SparkWeaverCore.h>
+
+SparkWeaverCore::Builder builder;
+
+void setup() {
+    Serial.begin(SERIAL_MONITOR_SPEED);
+    constexpr auto config = DMX_CONFIG_DEFAULT;
+    dmx_driver_install(DMX_UART_PORT, &config, {}, 0);
+    dmx_set_pin(DMX_UART_PORT, TX_PIN, RX_PIN, ENABLE_PIN);
+    
+    try {
+        builder.build("SrColor 0 0 0\n etc..."); // Load your tree here
+    } catch (const std::exception& e) {
+        Serial.println(e.what());
+    }
+}
+
+void loop()
+{
+    dmx_write(DMX_UART_PORT, builder.tick(), DMX_PACKET_SIZE);
+    dmx_send(DMX_UART_PORT);
+    dmx_wait_sent(DMX_UART_PORT, DMX_TIMEOUT_TICK);
+}
+
+```
+
+---
+
+## Development
+
+### Node name prefixes
+
+All nodes extend a common Node class and configure the allowed combination of inputs, triggers and parameters. This naming convention should be followed.
 
 - `ds` **Destination** (output color to fixture)
 - `fx` **Effect** (modifies color somehow)
@@ -12,16 +62,16 @@ All nodes extend a common Node class and configure the allowed combination of in
 - `sr` **Source** (input color)
 - `tr` **Trigger** (send or modify trigger signals)
 
-## Principles
+### Principles
 
 - Node tree must be a directed acyclic graph.
 - Nodes run in ticks evaluated from the destination node.
 - Nodes must evaluate all inputs at every tick. **_Skipping ticks breaks delays!_**
 - Tick length is not defined but assumed to be around 24ms, the time it takes to send one full 512 byte DMX packet. That's about 42 FPS. You can have faster updates by sending less than 512 bytes.
 
-## Tree format
+### Tree format
 
-Each line is a single command. Commands can have 0-N parameters separated by a space.
+Each line is a single command. Commands can have 0-`NODE_PARAMS_MAX` parameters separated by a space.
 
 ```
 COMMAND_A Param1 Param2 Param3
@@ -53,34 +103,9 @@ DsDmxRgb 50
 C 0 1
 ```
 
-More complex real world example for two randomly flashing strobes.
+---
 
-```c++
-SparkWeaverCore::Builder builder;
-
-try {
-    builder.build(""
-        "DsDmxRgb 1\n"
-        "DsDmxRgb 5\n"
-        "TrRandom 5 42\n"
-        "TrRandom 5 42\n"
-        "SrColor 255 255 255\n"
-        "FxStrobe 1\n"
-        "FxStrobe 1\n"
-        "C 4 5\n"
-        "C 4 6\n"
-        "C 5 0\n"
-        "C 6 1\n"
-        "T 2 5\n"
-        "T 3 6\n");
-} catch (const std::exception& e) {
-    Serial.println(e.what());
-}
-
-dmx_write(DMX_UART_PORT, builder.tick(), DMX_PACKET_SIZE);
-```
-
-# License
+## License
 
 SparkWeaver Copyright (c) 2025 Reino Zuppur
 
