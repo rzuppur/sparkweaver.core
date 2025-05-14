@@ -2,6 +2,8 @@
 
 Node-based lighting system for controlling DMX fixtures.
 
+![Lights running on SparkWeaver](p2.jpg)
+
 ### Motivation
 
 Created to run simple lighting setups using only a ESP32 hooked directly to DMX. The core library contains no platform-specific code, see below for implementations.
@@ -10,7 +12,7 @@ Created to run simple lighting setups using only a ESP32 hooked directly to DMX.
 
 ## Web interface
 
-For editing and simulating node trees, see [SparkWeaver Web](https://github.com/rzuppur/sparkweaver.web) UI. It provides easy editor to create node trees and visualize them using WebAssembly to run this core library.
+For editing and simulating node trees, see [SparkWeaver Web](https://github.com/rzuppur/sparkweaver.web) UI. It provides an easy editor to create node trees and visualize them using WebAssembly to run this core library.
 
 ![Screenshot of node based DMX lightning editor user interface](screen_web.jpg)
 
@@ -18,37 +20,9 @@ For editing and simulating node trees, see [SparkWeaver Web](https://github.com/
 
 ## Running on a microcontroller
 
-To send DMX signals from an ESP32, Arduino or similar microcontroller, you need a DMX shield or build your own using a chip like the MAX485. Inexpensive DMX shields with XLR connectors already attached are the easiest option. There isn’t one definitive guide to recommend, so please search the web to find more info relevant to your use case.
+To send DMX signals from an ESP32, see [SparkWeaver ESP](https://github.com/rzuppur/sparkweaver.esp) for a complete project compatible with SparkWeaver Web bluetooth interface. You need to connect a DMX board or build your own.
 
-### Incomplete example of SparkWeaver on an ESP32
-
-```c++
-#include <esp_dmx.h>
-#include <SparkWeaverCore.h>
-
-SparkWeaverCore::Builder builder;
-
-void setup() {
-    Serial.begin(SERIAL_MONITOR_SPEED);
-    constexpr auto config = DMX_CONFIG_DEFAULT;
-    dmx_driver_install(DMX_UART_PORT, &config, {}, 0);
-    dmx_set_pin(DMX_UART_PORT, TX_PIN, RX_PIN, ENABLE_PIN);
-    
-    try {
-        builder.build("SrColor 0 0 0\n etc..."); // Load your tree here
-    } catch (const std::exception& e) {
-        Serial.println(e.what());
-    }
-}
-
-void loop()
-{
-    dmx_write(DMX_UART_PORT, builder.tick(), DMX_PACKET_SIZE);
-    dmx_send(DMX_UART_PORT);
-    dmx_wait_sent(DMX_UART_PORT, DMX_TIMEOUT_TICK);
-}
-
-```
+![ESP32 + Keyestudio DMX Shield](p1.jpg)
 
 ---
 
@@ -68,8 +42,8 @@ All nodes extend a common Node class and configure the allowed combination of in
 
 - Node tree must be a directed acyclic graph.
 - Nodes run in ticks evaluated from the destination node.
-- Nodes must evaluate all inputs at every tick. **_Skipping ticks breaks delays!_**
-- Tick length is not defined but assumed to be around 24ms, the time it takes to send one full 512 byte DMX packet. That's about 42 FPS. You can have faster updates by sending less than 512 bytes.
+- Nodes must evaluate all inputs at every tick (otherwise delays would break, for example). Node output may be requested multiple times in a single tick.
+- Tick length is not defined but assumed to be around 24ms, the time it takes to send one full 512-byte DMX packet. That's about 42 FPS. You can have faster updates by sending less than 512 bytes.
 
 ### Tree format
 
@@ -89,7 +63,7 @@ Parameters must be unsigned 16-bit integers.
 
 #### **`C FROM_INDEX TO_INDEX`** color connection
 
-Colors are eight bit RGB values.
+Colors are eight-bit RGB values.
 
 #### **`T FROM_INDEX TO_INDEX`** trigger connection
 
@@ -108,6 +82,8 @@ C 0 1
 ---
 
 ## License
+
+MIT License
 
 SparkWeaver Copyright (c) 2025 Reino Zuppur
 
