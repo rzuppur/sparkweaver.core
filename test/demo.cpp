@@ -44,7 +44,7 @@ int main()
         const auto data = builder.tick();
         std::cout << std::format("{:02X} {:02X} {:02X} {:02X}\n", data[1], data[2], data[3], data[4]);
     } catch (const std::exception& e) {
-        std::cout << std::string("ERROR (") + e.what() << ")\n";
+        std::cout << std::string("ERROR ") + e.what() << "\n";
         std::cerr << e.what() << '\n';
     }
 

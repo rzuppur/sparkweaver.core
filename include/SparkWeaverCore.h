@@ -11,9 +11,11 @@
 #include "../src/nodes/MxAdd.h"
 #include "../src/nodes/MxSubtract.h"
 #include "../src/nodes/SrColor.h"
+#include "../src/nodes/TrChance.h"
 #include "../src/nodes/TrCycle.h"
 #include "../src/nodes/TrDelay.h"
 #include "../src/nodes/TrRandom.h"
+#include "../src/nodes/TrSequence.h"
 
 namespace SparkWeaverCore {
     inline std::vector<NodeConfig> getNodeConfigs()
@@ -26,9 +28,11 @@ namespace SparkWeaverCore {
             MxAdd::config,
             MxSubtract::config,
             SrColor::config,
+            TrChance::config,
             TrCycle::config,
             TrDelay::config,
             TrRandom::config,
+            TrSequence::config,
         };
     }
 

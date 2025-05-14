@@ -34,9 +34,11 @@ namespace SparkWeaverCore {
                 {MxAdd::config.name.data(), []() -> Node* { return new MxAdd(); }},
                 {MxSubtract::config.name.data(), []() -> Node* { return new MxSubtract(); }},
                 {SrColor::config.name.data(), []() -> Node* { return new SrColor(); }},
+                {TrChance::config.name.data(), []() -> Node* { return new TrChance(); }},
                 {TrCycle::config.name.data(), []() -> Node* { return new TrCycle(); }},
                 {TrDelay::config.name.data(), []() -> Node* { return new TrDelay(); }},
-                {TrRandom::config.name.data(), []() -> Node* { return new TrRandom(); }}};
+                {TrRandom::config.name.data(), []() -> Node* { return new TrRandom(); }},
+                {TrSequence::config.name.data(), []() -> Node* { return new TrSequence(); }}};
 
             for (const auto& [key, make] : node_registry) {
                 if (key == node_key) {

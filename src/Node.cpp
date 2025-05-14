@@ -15,12 +15,14 @@ namespace SparkWeaverCore {
 
     // COLOR OUT
 
-    int Node::getColorOutputIndex(const Node* const to) const noexcept
+    size_t Node::getColorOutputIndex(const Node* const to) const noexcept
     {
-        if (const auto i = std::find(color_outputs.begin(), color_outputs.end(), to); i != color_outputs.end()) {
-            return static_cast<int>(std::distance(color_outputs.begin(), i));
+        for (size_t i = 0; i < color_outputs.size(); i++) {
+            if (color_outputs[i] == to) {
+                return i;
+            }
         }
-        return -1;
+        return 0;
     }
 
     void Node::addColorOutput(Node* const output)
@@ -45,12 +47,14 @@ namespace SparkWeaverCore {
 
     // TRIGGER OUT
 
-    int Node::getTriggerOutputIndex(const Node* const to) const noexcept
+    size_t Node::getTriggerOutputIndex(const Node* const to) const noexcept
     {
-        if (const auto i = std::find(trigger_outputs.begin(), trigger_outputs.end(), to); i != trigger_outputs.end()) {
-            return static_cast<int>(std::distance(trigger_outputs.begin(), i));
+        for (size_t i = 0; i < trigger_outputs.size(); i++) {
+            if (trigger_outputs[i] == to) {
+                return i;
+            }
         }
-        return -1;
+        return 0;
     }
 
     void Node::addTriggerOutput(Node* const output)

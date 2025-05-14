@@ -90,18 +90,18 @@ namespace SparkWeaverCore {
         void               addColorInput(Node* input);
 
         // COLOR OUT
-        std::vector<Node*> color_outputs;
-        [[nodiscard]] int  getColorOutputIndex(const Node* to) const noexcept;
-        void               addColorOutput(Node* output);
+        std::vector<Node*>   color_outputs;
+        [[nodiscard]] size_t getColorOutputIndex(const Node* to) const noexcept;
+        void                 addColorOutput(Node* output);
 
         // TRIGGER IN
         std::vector<Node*> trigger_inputs;
         void               addTriggerInput(Node* input);
 
         // TRIGGER OUT
-        std::vector<Node*> trigger_outputs;
-        [[nodiscard]] int  getTriggerOutputIndex(const Node* to) const noexcept;
-        void               addTriggerOutput(Node* output);
+        std::vector<Node*>   trigger_outputs;
+        [[nodiscard]] size_t getTriggerOutputIndex(const Node* to) const noexcept;
+        void                 addTriggerOutput(Node* output);
 
     public:
         virtual ~Node() = default;

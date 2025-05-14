@@ -16,7 +16,13 @@ namespace SparkWeaverCore {
 
         [[nodiscard]] bool getTrigger(const uint32_t tick, const Node* requested_by) noexcept override
         {
-            if (tick > next_trigger || next_trigger == UINT32_MAX) {
+            bool set_new_trigger = trigger_inputs.empty() ? tick > next_trigger || next_trigger == UINT32_MAX : false;
+            for (auto* trigger : trigger_inputs) {
+                if (trigger->getTrigger(tick, this)) {
+                    set_new_trigger = true;
+                }
+            }
+            if (set_new_trigger) {
                 const uint16_t min_time = getParam(0) - 1;
                 const uint16_t max_time = getParam(1) - 1;
                 next_trigger            = tick + random(min_time, max_time);
@@ -29,7 +35,7 @@ namespace SparkWeaverCore {
         "TrRandom",
         "Random trigger",
         0,
-        0,
+        INPUTS_UNLIMITED,
         false,
         true,
         {{"min_time", 1, 0xFFFF, 40}, {"max_time", 1, 0xFFFF, 400}});
