@@ -32,6 +32,7 @@ namespace SparkWeaverCore {
                 {FxPulse::config.name.data(), []() -> Node* { return new FxPulse(); }},
                 {FxStrobe::config.name.data(), []() -> Node* { return new FxStrobe(); }},
                 {MxAdd::config.name.data(), []() -> Node* { return new MxAdd(); }},
+                {MxSequence::config.name.data(), []() -> Node* { return new MxSequence(); }},
                 {MxSubtract::config.name.data(), []() -> Node* { return new MxSubtract(); }},
                 {SrColor::config.name.data(), []() -> Node* { return new SrColor(); }},
                 {TrChance::config.name.data(), []() -> Node* { return new TrChance(); }},
@@ -145,7 +146,7 @@ namespace SparkWeaverCore {
 
     void Builder::build(const std::string& tree)
     {
-        time = 0;
+        current_tick = 0;
         resetNodeTree();
         clearCommandBuffer();
 
@@ -185,9 +186,9 @@ namespace SparkWeaverCore {
     {
         memset(dmx_data, 0, sizeof(dmx_data));
         for (const auto root_node : root_nodes) {
-            root_node->render(time, dmx_data);
+            root_node->render(current_tick, dmx_data);
         }
-        time++;
+        current_tick++;
         return dmx_data;
     }
 }

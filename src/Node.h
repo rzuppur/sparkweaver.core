@@ -14,7 +14,7 @@
 namespace SparkWeaverCore {
     constexpr int DMX_PACKET_SIZE  = 513;
     constexpr int INPUTS_UNLIMITED = 32;
-    constexpr int NODE_PARAMS_MAX  = 8;
+    constexpr int NODE_PARAMS_MAX  = 3;
 
     struct NodeParam {
         std::array<char, 16> name{};

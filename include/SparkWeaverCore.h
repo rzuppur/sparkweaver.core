@@ -9,6 +9,7 @@
 #include "../src/nodes/FxPulse.h"
 #include "../src/nodes/FxStrobe.h"
 #include "../src/nodes/MxAdd.h"
+#include "../src/nodes/MxSequence.h"
 #include "../src/nodes/MxSubtract.h"
 #include "../src/nodes/SrColor.h"
 #include "../src/nodes/TrChance.h"
@@ -26,6 +27,7 @@ namespace SparkWeaverCore {
             FxPulse::config,
             FxStrobe::config,
             MxAdd::config,
+            MxSequence::config,
             MxSubtract::config,
             SrColor::config,
             TrChance::config,
@@ -37,7 +39,7 @@ namespace SparkWeaverCore {
     }
 
     class Builder {
-        uint32_t           time                      = 0;
+        uint32_t           current_tick              = 0;
         uint8_t            dmx_data[DMX_PACKET_SIZE] = {};
         std::vector<Node*> root_nodes;
         std::vector<Node*> all_nodes;

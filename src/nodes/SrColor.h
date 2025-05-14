@@ -11,7 +11,7 @@ namespace SparkWeaverCore {
 
         SrColor() { init(); }
 
-        [[nodiscard]] Color getColor(const uint32_t time, const Node* requested_by) noexcept override
+        [[nodiscard]] Color getColor(const uint32_t tick, const Node* requested_by) noexcept override
         {
             return {
                 static_cast<uint8_t>(getParam(0)),

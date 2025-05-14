@@ -27,15 +27,13 @@ namespace SparkWeaverCore {
                         cache_trigger = true;
                     }
                 }
-
-                // Only when triggered set a new active output index
-                if (cache_trigger) {
+                if (cache_trigger && !trigger_outputs.empty()) {
                     if (getParam(0) == 1) {
                         active_index = random(0, trigger_outputs.size() - 1);
                     } else {
                         if (is_first_trigger) {
                             is_first_trigger = false;
-                            active_index     = 0; // Makes sure the sequence starts from the first output
+                            active_index     = 0;
                         } else {
                             active_index = (active_index + 1) % trigger_outputs.size();
                         }

@@ -11,11 +11,11 @@ namespace SparkWeaverCore {
 
         MxAdd() { init(); }
 
-        [[nodiscard]] Color getColor(const uint32_t time, const Node* requested_by) noexcept override
+        [[nodiscard]] Color getColor(const uint32_t tick, const Node* requested_by) noexcept override
         {
             Color sum = Colors::BLACK;
             for (auto* color_input : color_inputs) {
-                sum = sum + color_input->getColor(time, this);
+                sum = sum + color_input->getColor(tick, this);
             }
             return sum;
         }
