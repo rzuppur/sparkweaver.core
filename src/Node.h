@@ -87,21 +87,17 @@ namespace SparkWeaverCore {
     protected:
         // COLOR IN
         std::vector<Node*> color_inputs;
-        void               addColorInput(Node* input);
 
         // COLOR OUT
         std::vector<Node*>   color_outputs;
         [[nodiscard]] size_t getColorOutputIndex(const Node* to) const noexcept;
-        void                 addColorOutput(Node* output);
 
         // TRIGGER IN
         std::vector<Node*> trigger_inputs;
-        void               addTriggerInput(Node* input);
 
         // TRIGGER OUT
         std::vector<Node*>   trigger_outputs;
         [[nodiscard]] size_t getTriggerOutputIndex(const Node* to) const noexcept;
-        void                 addTriggerOutput(Node* output);
 
     public:
         virtual ~Node() = default;
@@ -150,11 +146,17 @@ namespace SparkWeaverCore {
          */
         virtual void render(uint32_t tick, uint8_t* p_dmx_data) noexcept {}
 
-        /** @throws InvalidConnectionException if trying to make an invalid connection */
-        static void connectColor(Node* from, Node* to);
+        /** @throws InvalidConnectionException */
+        void addColorInput(Node* input);
 
-        /** @throws InvalidConnectionException if trying to make an invalid connection */
-        static void connectTrigger(Node* from, Node* to);
+        /** @throws InvalidConnectionException */
+        void addColorOutput(Node* output);
+
+        /** @throws InvalidConnectionException */
+        void addTriggerInput(Node* input);
+
+        /** @throws InvalidConnectionException */
+        void addTriggerOutput(Node* output);
     };
 
     class InvalidConnectionException final : public std::exception {

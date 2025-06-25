@@ -104,21 +104,28 @@ namespace SparkWeaverCore {
     void Builder::parseTreeCommand(const std::string& command, const std::vector<std::string>& params)
     {
         // CONNECTION
-        if (command == "C" || command == "T") {
-            if (params.size() != 2) {
+        if (command == "CI" || command == "CO" || command == "TI" || command == "TO") {
+            if (params.size() < 2) {
                 throw InvalidTreeException(command + " invalid parameters");
             }
             const auto parsed_params = parseParams("Connection", params);
-            const auto from          = parsed_params.at(0);
-            const auto to            = parsed_params.at(1);
-            if (from >= all_nodes.size() || to >= all_nodes.size()) {
-                throw InvalidTreeException(
-                    "Connection " + std::to_string(from) + "-" + std::to_string(to) + " out of range");
+            const auto source        = parsed_params.at(0);
+            if (source >= all_nodes.size()) {
+                throw InvalidTreeException("Connection node " + std::to_string(source) + " out of range");
             }
-            if (command == "C") {
-                Node::connectColor(all_nodes.at(from), all_nodes.at(to));
-            } else if (command == "T") {
-                Node::connectTrigger(all_nodes.at(from), all_nodes.at(to));
+            for (auto connection = parsed_params.begin() + 1; connection != parsed_params.end(); ++connection) {
+                if (*connection >= all_nodes.size()) {
+                    throw InvalidTreeException("Connection node " + std::to_string(*connection) + " out of range");
+                }
+                if (command == "CI") {
+                    all_nodes.at(source)->addColorInput(all_nodes.at(*connection));
+                } else if (command == "CO") {
+                    all_nodes.at(source)->addColorOutput(all_nodes.at(*connection));
+                } else if (command == "TI") {
+                    all_nodes.at(source)->addTriggerInput(all_nodes.at(*connection));
+                } else if (command == "TO") {
+                    all_nodes.at(source)->addTriggerOutput(all_nodes.at(*connection));
+                }
             }
         }
 

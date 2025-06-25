@@ -55,17 +55,19 @@ COMMAND_B Param1
 COMMAND_C
 ```
 
-Commands are either node names (SrColor, MxAdd, etc.) or a connection from one node to another. Nodes are zero-indexed starting from the top.
+Commands are either node names (SrColor, MxAdd, etc.) or a list of connections to a node. Nodes are zero-indexed starting from the top. Connections should be after all node definitions.
 
 Parameters must be unsigned 16-bit integers.
 
 ### Connection commands
 
-#### **`C FROM_INDEX TO_INDEX`** color connection
+- **`CI SOURCE_INDEX [FROM_INDEX ...]`** color inputs
+- **`CO SOURCE_INDEX [TO_INDEX ...]`** color outputs
 
 Colors are eight-bit RGB values.
 
-#### **`T FROM_INDEX TO_INDEX`** trigger connection
+- **`TI SOURCE_INDEX [FROM_INDEX ...]`** trigger inputs
+- **`TO SOURCE_INDEX [TO_INDEX ...]`** trigger outputs
 
 Triggers are boolean signals, can be used to trigger effects.
 
@@ -76,7 +78,8 @@ Creates a red (255 0 0) color input node (index 0), connects its color output to
 ```
 SrColor 255 0 0
 DsDmxRgb 50
-C 0 1
+CO 0 1
+CI 1 0
 ```
 
 ---

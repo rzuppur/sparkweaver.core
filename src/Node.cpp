@@ -65,18 +65,4 @@ namespace SparkWeaverCore {
             throw InvalidConnectionException(getName(), "trigger_outputs disabled");
         }
     }
-
-    // STATIC
-
-    void Node::connectColor(Node* const from, Node* const to)
-    {
-        from->addColorOutput(to);
-        to->addColorInput(from);
-    }
-
-    void Node::connectTrigger(Node* const from, Node* const to)
-    {
-        from->addTriggerOutput(to);
-        to->addTriggerInput(from);
-    }
 }

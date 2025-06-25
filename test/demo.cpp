@@ -40,7 +40,7 @@ int main()
     std::cout << "\n\nSMOKE TEST\n\nexpected FF 80 40 00\nresult   ";
     try {
         SparkWeaverCore::Builder builder;
-        builder.build("DsDmxRgb 1\nSrColor 255 128 64\nC 1 0\n");
+        builder.build("DsDmxRgb 1\nSrColor 255 128 64\nCO 1 0\nCI 0 1\n");
         const auto data = builder.tick();
         std::cout << std::format("{:02X} {:02X} {:02X} {:02X}\n", data[1], data[2], data[3], data[4]);
     } catch (const std::exception& e) {
