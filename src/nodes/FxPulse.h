@@ -32,10 +32,10 @@ namespace SparkWeaverCore {
                 const auto decay   = getParam(2);
 
                 const auto relative_tick = tick - pulse_tick;
-                const auto color         = color_inputs.at(0)->getColor(tick, this);
                 cache_color              = Colors::BLACK;
 
                 if (!color_inputs.empty() && tick >= pulse_tick) {
+                    const auto color = color_inputs.at(0)->getColor(tick, this);
                     if (relative_tick < attack) {
                         cache_color = color * (static_cast<float>(relative_tick) / static_cast<float>(attack));
                     } else if (relative_tick < attack + sustain) {
