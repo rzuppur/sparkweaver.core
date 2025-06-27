@@ -34,6 +34,7 @@ namespace SparkWeaverCore {
                 {MxAdd::config.name.data(), []() -> Node* { return new MxAdd(); }},
                 {MxSequence::config.name.data(), []() -> Node* { return new MxSequence(); }},
                 {MxSubtract::config.name.data(), []() -> Node* { return new MxSubtract(); }},
+                {MxSwitch::config.name.data(), []() -> Node* { return new MxSwitch(); }},
                 {SrColor::config.name.data(), []() -> Node* { return new SrColor(); }},
                 {TrChance::config.name.data(), []() -> Node* { return new TrChance(); }},
                 {TrCycle::config.name.data(), []() -> Node* { return new TrCycle(); }},

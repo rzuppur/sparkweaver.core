@@ -4,6 +4,10 @@
 #include "../utils/random.h"
 
 namespace SparkWeaverCore {
+    /**
+     * @class TrSequence
+     * @brief Sends incoming triggers to a single trigger output, either sequentially or randomly.
+     */
     class TrSequence final : public Node {
         size_t   active_index     = 0;
         uint32_t cache_tick       = UINT32_MAX;
@@ -29,7 +33,7 @@ namespace SparkWeaverCore {
                 }
                 if (cache_trigger && !trigger_outputs.empty()) {
                     if (getParam(0) == 1) {
-                        active_index = random(0, trigger_outputs.size() - 1);
+                        active_index = random(0, static_cast<int>(trigger_outputs.size()) - 1);
                     } else {
                         if (is_first_trigger) {
                             is_first_trigger = false;

@@ -5,10 +5,10 @@
 
 namespace SparkWeaverCore {
     /**
-     * @class MxSequence
-     * @brief Sends color input to a single color output, change output with a trigger.
+     * @class MxSwitch
+     * @brief On trigger chooses a single color input to be passed through to all color outputs.
      */
-    class MxSequence final : public Node {
+    class MxSwitch final : public Node {
         size_t   active_index     = 0;
         uint32_t cache_tick       = UINT32_MAX;
         Color    cache_color      = Colors::BLACK;
@@ -19,7 +19,7 @@ namespace SparkWeaverCore {
 
         [[nodiscard]] const NodeConfig& getConfig() const noexcept override { return config; }
 
-        MxSequence() { init(); }
+        MxSwitch() { init(); }
 
         [[nodiscard]] Color getColor(const uint32_t tick, const Node* requested_by) noexcept override
         {
@@ -31,26 +31,26 @@ namespace SparkWeaverCore {
                         trigger_active = true;
                     }
                 }
-                if (!color_inputs.empty() && !color_outputs.empty()) {
-                    cache_color = color_inputs.at(0)->getColor(tick, this);
+                if (!color_inputs.empty()) {
                     if (trigger_active) {
                         if (getParam(0) == 1) {
-                            active_index = random(0, static_cast<int>(color_outputs.size()) - 1);
+                            active_index = random(0, static_cast<int>(color_inputs.size()) - 1);
                         } else {
                             if (is_first_trigger) {
                                 is_first_trigger = false;
                                 active_index     = 0;
                             } else {
-                                active_index = (active_index + 1) % color_outputs.size();
+                                active_index = (active_index + 1) % color_inputs.size();
                             }
                         }
                     }
+                    cache_color = color_inputs.at(active_index)->getColor(tick, this);
                 }
             }
-            return getColorOutputIndex(requested_by) == active_index ? cache_color : Colors::BLACK;
+            return cache_color;
         }
     };
 
-    constexpr NodeConfig MxSequence::config =
-        NodeConfig("MxSequence", "Color sequence", 1, INPUTS_UNLIMITED, true, false, {{"random", 0, 1, 0}});
+    constexpr NodeConfig MxSwitch::config =
+        NodeConfig("MxSwitch", "Color switch", INPUTS_UNLIMITED, INPUTS_UNLIMITED, true, false, {{"random", 0, 1, 0}});
 }

@@ -43,7 +43,7 @@ All nodes extend a common Node class and configure the allowed combination of in
 - Node tree must be a directed acyclic graph.
 - Nodes run in ticks evaluated from the destination node.
 - Nodes must evaluate all inputs at every tick (otherwise delays would break, for example). Node output may be requested multiple times in a single tick.
-- Tick length is not defined but assumed to be around 24ms, the time it takes to send one full 512-byte DMX packet. That's about 42 FPS. You can have faster updates by sending less than 512 bytes.
+- Tick length is not defined but assumed to be around 24 ms, the time it takes to send one full 512-byte DMX packet. That's about 42 FPS. You can have faster updates by sending less than 512 bytes.
 
 ### Tree format
 

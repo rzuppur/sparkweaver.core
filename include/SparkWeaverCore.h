@@ -11,6 +11,7 @@
 #include "../src/nodes/MxAdd.h"
 #include "../src/nodes/MxSequence.h"
 #include "../src/nodes/MxSubtract.h"
+#include "../src/nodes/MxSwitch.h"
 #include "../src/nodes/SrColor.h"
 #include "../src/nodes/TrChance.h"
 #include "../src/nodes/TrCycle.h"
@@ -29,6 +30,7 @@ namespace SparkWeaverCore {
             MxAdd::config,
             MxSequence::config,
             MxSubtract::config,
+            MxSwitch::config,
             SrColor::config,
             TrChance::config,
             TrCycle::config,
