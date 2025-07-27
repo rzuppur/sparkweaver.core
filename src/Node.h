@@ -157,7 +157,7 @@ namespace SparkWeaverCore {
          */
         [[nodiscard]] virtual const NodeConfig& getConfig() const noexcept { return default_config; }
 
-        [[nodiscard]] uint8_t getTypeId() const noexcept { return {getConfig().type_id}; }
+        [[nodiscard]] uint8_t getTypeId() const noexcept { return getConfig().type_id; }
 
         [[nodiscard]] std::string getName() const noexcept { return {getConfig().name.data()}; }
 
