@@ -18,20 +18,24 @@ namespace SparkWeaverCore {
     constexpr uint8_t TREE_VERSION     = 0x01;
 
     namespace TypeIds {
-        constexpr uint8_t DsDmxRgb   = 0x01;
-        constexpr uint8_t FxBreathe  = 0x02;
-        constexpr uint8_t FxPulse    = 0x03;
-        constexpr uint8_t FxStrobe   = 0x04;
-        constexpr uint8_t MxAdd      = 0x05;
-        constexpr uint8_t MxSequence = 0x06;
-        constexpr uint8_t MxSubtract = 0x07;
-        constexpr uint8_t MxSwitch   = 0x08;
-        constexpr uint8_t SrColor    = 0x09;
-        constexpr uint8_t TrChance   = 0x0A;
-        constexpr uint8_t TrCycle    = 0x0B;
-        constexpr uint8_t TrDelay    = 0x0C;
-        constexpr uint8_t TrRandom   = 0x0D;
-        constexpr uint8_t TrSequence = 0x0E;
+        constexpr uint8_t DsDmxRgb   = 0x00;
+
+        constexpr uint8_t FxBreathe  = 0x20;
+        constexpr uint8_t FxPulse    = 0x21;
+        constexpr uint8_t FxStrobe   = 0x22;
+
+        constexpr uint8_t MxAdd      = 0x40;
+        constexpr uint8_t MxSequence = 0x41;
+        constexpr uint8_t MxSubtract = 0x42;
+        constexpr uint8_t MxSwitch   = 0x43;
+
+        constexpr uint8_t SrColor    = 0x60;
+
+        constexpr uint8_t TrChance   = 0x80;
+        constexpr uint8_t TrCycle    = 0x81;
+        constexpr uint8_t TrDelay    = 0x82;
+        constexpr uint8_t TrRandom   = 0x83;
+        constexpr uint8_t TrSequence = 0x84;
     }
 
     namespace CommandIds {

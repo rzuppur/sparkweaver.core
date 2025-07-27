@@ -47,39 +47,28 @@ All nodes extend a common Node class and configure the allowed combination of in
 
 ### Tree format
 
-Each line is a single command. Commands can have 0-`NODE_PARAMS_MAX` parameters separated by a space.
+The first byte is the node tree format version. The rest of the tree should have a command byte followed by command parameters, if any.
 
-```
-COMMAND_A Param1 Param2 Param3
-COMMAND_B Param1
-COMMAND_C
-```
-
-Commands are either node names (SrColor, MxAdd, etc.) or a list of connections to a node. Nodes are zero-indexed starting from the top. Connections should be after all node definitions.
-
-Parameters must be unsigned 16-bit integers.
-
-### Connection commands
-
-- **`CI SOURCE_INDEX [FROM_INDEX ...]`** color inputs
-- **`CO SOURCE_INDEX [TO_INDEX ...]`** color outputs
-
-Colors are eight-bit RGB values.
-
-- **`TI SOURCE_INDEX [FROM_INDEX ...]`** trigger inputs
-- **`TO SOURCE_INDEX [TO_INDEX ...]`** trigger outputs
-
-Triggers are boolean signals, can be used to trigger effects.
+Parameters are little-endian uint16. All parameters are required.
 
 ### Example
 
-Creates a red (255 0 0) color input node (index 0), connects its color output to DMX fixture (index 1) at address 50.
+Creates a orange `#FF8040` color input node and connects its color output to a DMX fixture at address 50.
 
-```
-SrColor 255 0 0
-DsDmxRgb 50
-CO 0 1
-CI 1 0
+```bash
+01    # version
+00    # first command (DMX output)
+32 00 # first parameter (address)
+60    # second command (Color)
+FF 00 # first parameter (red)
+80 00 # second parameter (green)
+40 00 # third parameter (blue)
+FE    # color output
+01 00 # output source node index
+00 00 # output target node index
+FC    # color input
+00 00 # input source node index
+01 00 # input target node index
 ```
 
 ---
