@@ -17,9 +17,9 @@ int main()
     std::cout << "SparkWeaverCore\n\nNODE TYPES\n\n";
     for (const auto configs = SparkWeaverCore::getNodeConfigs(); const auto& config : configs) {
         std::cout << std::format(
-            "{:<16} {:<24} C {}{:0>2}{}   T {}{:0>2}{}\n",
+            "{:02X} {:<24} C {}{:0>2}{}   T {}{:0>2}{}\n",
+            config.type_id,
             config.name.data(),
-            config.title.data(),
             config.max_color_inputs > 0 ? "->" : "  ",
             config.max_color_inputs,
             config.enable_color_outputs ? "->" : "  ",
@@ -40,11 +40,32 @@ int main()
     std::cout << "\n\nSMOKE TEST\n\nexpected FF 80 40 00\nresult   ";
     try {
         SparkWeaverCore::Builder builder;
-        builder.build("DsDmxRgb 1\nSrColor 255 128 64\nCO 1 0\nCI 0 1\n");
+        builder.build(
+            {SparkWeaverCore::TREE_VERSION,
+             SparkWeaverCore::TypeIds::DsDmxRgb,
+             0x01,
+             0x00,
+             SparkWeaverCore::TypeIds::SrColor,
+             0xFF,
+             0x00,
+             0x80,
+             0x00,
+             0x40,
+             0x00,
+             SparkWeaverCore::CommandIds::ColorOutput,
+             0x01,
+             0x00,
+             0x00,
+             0x00,
+             SparkWeaverCore::CommandIds::ColorInput,
+             0x00,
+             0x00,
+             0x01,
+             0x00});
         const auto data = builder.tick();
         std::cout << std::format("{:02X} {:02X} {:02X} {:02X}\n", data[1], data[2], data[3], data[4]);
     } catch (const std::exception& e) {
-        std::cout << std::string("ERROR ") + e.what() << "\n";
+        std::cout << e.what() << "\n";
         std::cerr << e.what() << '\n';
     }
 

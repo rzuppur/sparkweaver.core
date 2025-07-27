@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <string>
 
 #include "../src/Node.h"
 #include "../src/nodes/DsDmxRgb.h"
@@ -47,19 +46,9 @@ namespace SparkWeaverCore {
         std::vector<Node*> all_nodes;
         void               resetNodeTree() noexcept;
 
-        // NODE TREE PARSING
-        std::string              buffer_command;
-        bool                     buffer_command_parsed = false;
-        std::string              buffer_current_param;
-        std::vector<std::string> buffer_all_params;
-        void                     closeParam() noexcept;
-        void                     clearCommandBuffer() noexcept;
-        void                     finishCommand();
-        void                     parseTreeCommand(const std::string& command, const std::vector<std::string>& params);
-
     public:
         /** @throws InvalidTreeException if the tree contains errors */
-        void build(const std::string& tree);
+        void build(const std::vector<uint8_t>& tree);
 
         [[nodiscard]] uint8_t* tick() noexcept;
     };

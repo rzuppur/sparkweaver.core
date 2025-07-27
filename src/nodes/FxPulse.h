@@ -51,7 +51,7 @@ namespace SparkWeaverCore {
     };
 
     constexpr NodeConfig FxPulse::config = NodeConfig(
-        "FxPulse",
+        TypeIds::FxPulse,
         "Pulse effect",
         1,
         INPUTS_UNLIMITED,

@@ -1,4 +1,3 @@
-#include <array>
 #include <cstring>
 
 #include "Node.h"
@@ -8,10 +7,10 @@ namespace SparkWeaverCore {
     namespace {
         const auto node_configs = getNodeConfigs();
 
-        const NodeConfig* getConfig(const std::string_view node_key)
+        const NodeConfig* getConfig(const uint8_t type_id)
         {
             for (const auto& config : node_configs) {
-                if (std::string_view(config.name.data()) == node_key) {
+                if (config.type_id == type_id) {
                     return &config;
                 }
             }
@@ -20,51 +19,34 @@ namespace SparkWeaverCore {
 
         using NodeCtor = Node* (*)();
         struct NodeFactory {
-            std::string_view key;
-            NodeCtor         make;
+            uint8_t  type_id;
+            NodeCtor make;
         };
 
-        Node* makeNode(const std::string_view node_key)
+        Node* makeNode(const uint8_t type_id)
         {
             static const std::vector<NodeFactory> node_registry{
-                {DsDmxRgb::config.name.data(), []() -> Node* { return new DsDmxRgb(); }},
-                {FxBreathe::config.name.data(), []() -> Node* { return new FxBreathe(); }},
-                {FxPulse::config.name.data(), []() -> Node* { return new FxPulse(); }},
-                {FxStrobe::config.name.data(), []() -> Node* { return new FxStrobe(); }},
-                {MxAdd::config.name.data(), []() -> Node* { return new MxAdd(); }},
-                {MxSequence::config.name.data(), []() -> Node* { return new MxSequence(); }},
-                {MxSubtract::config.name.data(), []() -> Node* { return new MxSubtract(); }},
-                {MxSwitch::config.name.data(), []() -> Node* { return new MxSwitch(); }},
-                {SrColor::config.name.data(), []() -> Node* { return new SrColor(); }},
-                {TrChance::config.name.data(), []() -> Node* { return new TrChance(); }},
-                {TrCycle::config.name.data(), []() -> Node* { return new TrCycle(); }},
-                {TrDelay::config.name.data(), []() -> Node* { return new TrDelay(); }},
-                {TrRandom::config.name.data(), []() -> Node* { return new TrRandom(); }},
-                {TrSequence::config.name.data(), []() -> Node* { return new TrSequence(); }}};
+                {DsDmxRgb::config.type_id, []() -> Node* { return new DsDmxRgb(); }},
+                {FxBreathe::config.type_id, []() -> Node* { return new FxBreathe(); }},
+                {FxPulse::config.type_id, []() -> Node* { return new FxPulse(); }},
+                {FxStrobe::config.type_id, []() -> Node* { return new FxStrobe(); }},
+                {MxAdd::config.type_id, []() -> Node* { return new MxAdd(); }},
+                {MxSequence::config.type_id, []() -> Node* { return new MxSequence(); }},
+                {MxSubtract::config.type_id, []() -> Node* { return new MxSubtract(); }},
+                {MxSwitch::config.type_id, []() -> Node* { return new MxSwitch(); }},
+                {SrColor::config.type_id, []() -> Node* { return new SrColor(); }},
+                {TrChance::config.type_id, []() -> Node* { return new TrChance(); }},
+                {TrCycle::config.type_id, []() -> Node* { return new TrCycle(); }},
+                {TrDelay::config.type_id, []() -> Node* { return new TrDelay(); }},
+                {TrRandom::config.type_id, []() -> Node* { return new TrRandom(); }},
+                {TrSequence::config.type_id, []() -> Node* { return new TrSequence(); }}};
 
-            for (const auto& [key, make] : node_registry) {
-                if (key == node_key) {
-                    return make();
+            for (const auto& [factory_type_id, factory_make] : node_registry) {
+                if (factory_type_id == type_id) {
+                    return factory_make();
                 }
             }
             return nullptr;
-        }
-
-        [[nodiscard]] std::vector<uint16_t> parseParams(const std::string& name, const std::vector<std::string>& params)
-        {
-            std::vector<uint16_t> result(params.size());
-            try {
-                for (std::size_t i = 0; i < params.size(); ++i) {
-                    const auto value = std::stoul(params[i]);
-                    if (value > UINT16_MAX) {
-                        throw InvalidTreeException(name + " parameter outside range");
-                    }
-                    result[i] = static_cast<uint16_t>(value);
-                }
-            } catch (...) {
-                throw InvalidTreeException(name + " invalid parameters");
-            }
-            return result;
         }
     }
 
@@ -77,109 +59,100 @@ namespace SparkWeaverCore {
         root_nodes.clear();
     }
 
-    void Builder::closeParam() noexcept
-    {
-        if (!buffer_current_param.empty()) {
-            buffer_all_params.push_back(buffer_current_param);
-            buffer_current_param.clear();
-        }
-    }
-
-    void Builder::clearCommandBuffer() noexcept
-    {
-        buffer_command.clear();
-        buffer_command_parsed = false;
-        buffer_current_param.clear();
-        buffer_all_params.clear();
-    }
-
-    void Builder::finishCommand()
-    {
-        closeParam();
-        if (!buffer_command.empty()) {
-            parseTreeCommand(buffer_command, buffer_all_params);
-        }
-        clearCommandBuffer();
-    }
-
-    void Builder::parseTreeCommand(const std::string& command, const std::vector<std::string>& params)
-    {
-        // CONNECTION
-        if (command == "CI" || command == "CO" || command == "TI" || command == "TO") {
-            if (params.size() < 2) {
-                throw InvalidTreeException(command + " invalid parameters");
-            }
-            const auto parsed_params = parseParams("Connection", params);
-            const auto source        = parsed_params.at(0);
-            if (source >= all_nodes.size()) {
-                throw InvalidTreeException("Connection node " + std::to_string(source) + " out of range");
-            }
-            for (auto connection = parsed_params.begin() + 1; connection != parsed_params.end(); ++connection) {
-                if (*connection >= all_nodes.size()) {
-                    throw InvalidTreeException("Connection node " + std::to_string(*connection) + " out of range");
-                }
-                if (command == "CI") {
-                    all_nodes.at(source)->addColorInput(all_nodes.at(*connection));
-                } else if (command == "CO") {
-                    all_nodes.at(source)->addColorOutput(all_nodes.at(*connection));
-                } else if (command == "TI") {
-                    all_nodes.at(source)->addTriggerInput(all_nodes.at(*connection));
-                } else if (command == "TO") {
-                    all_nodes.at(source)->addTriggerOutput(all_nodes.at(*connection));
-                }
-            }
-        }
-
-        // NODE
-        else if (const auto config = getConfig(command)) {
-            if (params.size() != config->params_count) {
-                throw InvalidTreeException(command + " invalid parameters");
-            }
-            const auto parsed_params = parseParams(command, params);
-            const auto p_node        = makeNode(command);
-            if (!p_node) {
-                throw InvalidTreeException(command + " not found");
-            }
-            for (size_t i = 0; i < parsed_params.size(); i++) {
-                p_node->setParam(i, parsed_params[i]);
-            }
-            all_nodes.push_back(p_node);
-            if (!config->enable_color_outputs && !config->enable_trigger_outputs) {
-                root_nodes.push_back(p_node);
-            }
-        } else {
-            throw InvalidTreeException("Unknown command: " + command);
-        }
-    }
-
-    void Builder::build(const std::string& tree)
+    void Builder::build(const std::vector<uint8_t>& tree)
     {
         current_tick = 0;
         resetNodeTree();
-        clearCommandBuffer();
 
         try {
-            for (const char c : tree) {
-                if (c == '\n') {
-                    finishCommand();
-                } else if (c == ' ') {
-                    if (buffer_command.empty()) {
-                        throw InvalidTreeException();
-                    }
-                    if (buffer_command_parsed) {
-                        closeParam();
+            int                   chr_pos     = 0;
+            uint8_t               command     = 0;
+            uint8_t               params_left = 0;
+            uint8_t               param_lsb   = 0;
+            std::vector<uint16_t> params      = {};
+
+            for (const auto byte : tree) {
+                // CHECK VERSION
+                if (chr_pos == 0) {
+                    if (byte != TREE_VERSION) throw InvalidTreeException(chr_pos, "Incompatible tree version");
+                }
+
+                // PARSE PARAMS
+                else if (params_left > 0) {
+                    if (params_left % 2 == 0) {
+                        param_lsb = byte;
                     } else {
-                        buffer_command_parsed = true;
+                        params.push_back(static_cast<uint16_t>(byte) << 8 | param_lsb);
                     }
-                } else {
-                    if (buffer_command_parsed) {
-                        buffer_current_param.push_back(c);
-                    } else {
-                        buffer_command.push_back(c);
+                    --params_left;
+                    if (params_left == 0) {
+                        // CONNECTION
+                        if (command == CommandIds::ColorInput || command == CommandIds::TriggerInput ||
+                            command == CommandIds::ColorOutput || command == CommandIds::TriggerOutput) {
+                            const auto from = params.at(0);
+                            const auto to   = params.at(1);
+                            if (from >= all_nodes.size() || to >= all_nodes.size() || from == to) {
+                                throw InvalidTreeException(chr_pos, "Invalid connection");
+                            }
+                            if (command == CommandIds::ColorInput) {
+                                all_nodes.at(from)->addColorInput(all_nodes.at(to));
+                            } else if (command == CommandIds::ColorOutput) {
+                                all_nodes.at(from)->addColorOutput(all_nodes.at(to));
+                            } else if (command == CommandIds::TriggerInput) {
+                                all_nodes.at(from)->addTriggerInput(all_nodes.at(to));
+                            } else if (command == CommandIds::TriggerOutput) {
+                                all_nodes.at(from)->addTriggerOutput(all_nodes.at(to));
+                            }
+                        }
+
+                        // NODE
+                        else {
+                            const auto p_node = makeNode(command);
+                            const auto config = getConfig(command);
+                            if (!p_node || !config) throw InvalidTreeException(chr_pos);
+                            for (size_t i = 0; i < params.size(); i++) {
+                                p_node->setParam(i, params[i]);
+                            }
+                            all_nodes.push_back(p_node);
+                            if (!config->enable_color_outputs && !config->enable_trigger_outputs) {
+                                root_nodes.push_back(p_node);
+                            }
+                        }
                     }
                 }
+
+                // PARSE COMMAND
+                else {
+                    params.clear();
+                    command = byte;
+
+                    // CONNECTION
+                    if (command == CommandIds::ColorInput || command == CommandIds::TriggerInput ||
+                        command == CommandIds::ColorOutput || command == CommandIds::TriggerOutput) {
+                        params_left = 2 * 2;
+                    }
+
+                    // NODE
+                    else if (const auto config = getConfig(command)) {
+                        if (config->params_count > 0) {
+                            params_left = config->params_count * 2;
+                        } else {
+                            const auto p_node = makeNode(command);
+                            if (!p_node) throw InvalidTreeException(chr_pos);
+                            all_nodes.push_back(p_node);
+                            if (!config->enable_color_outputs && !config->enable_trigger_outputs) {
+                                root_nodes.push_back(p_node);
+                            }
+                        }
+                    }
+
+                    // INVALID
+                    else
+                        throw InvalidTreeException(chr_pos, "Invalid command");
+                }
+
+                ++chr_pos;
             }
-            finishCommand();
         } catch (...) {
             resetNodeTree();
             throw;

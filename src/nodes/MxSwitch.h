@@ -51,6 +51,12 @@ namespace SparkWeaverCore {
         }
     };
 
-    constexpr NodeConfig MxSwitch::config =
-        NodeConfig("MxSwitch", "Color switch", INPUTS_UNLIMITED, INPUTS_UNLIMITED, true, false, {{"random", 0, 1, 0}});
+    constexpr NodeConfig MxSwitch::config = NodeConfig(
+        TypeIds::MxSwitch,
+        "Color switch",
+        INPUTS_UNLIMITED,
+        INPUTS_UNLIMITED,
+        true,
+        false,
+        {{"random", 0, 1, 0}});
 }

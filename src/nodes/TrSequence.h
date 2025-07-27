@@ -49,5 +49,5 @@ namespace SparkWeaverCore {
     };
 
     constexpr NodeConfig TrSequence::config =
-        NodeConfig("TrSequence", "Trigger sequence", 0, INPUTS_UNLIMITED, false, true, {{"random", 0, 1, 0}});
+        NodeConfig(TypeIds::TrSequence, "Trigger sequence", 0, INPUTS_UNLIMITED, false, true, {{"random", 0, 1, 0}});
 }

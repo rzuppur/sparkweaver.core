@@ -21,7 +21,7 @@ namespace SparkWeaverCore {
     };
 
     constexpr NodeConfig SrColor::config = NodeConfig(
-        "SrColor",
+        TypeIds::SrColor,
         "Color",
         0,
         0,

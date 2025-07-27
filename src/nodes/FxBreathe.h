@@ -39,7 +39,7 @@ namespace SparkWeaverCore {
     };
 
     constexpr NodeConfig FxBreathe::config = NodeConfig(
-        "FxBreathe",
+        TypeIds::FxBreathe,
         "Breathe effect",
         1,
         0,

@@ -32,7 +32,7 @@ namespace SparkWeaverCore {
     };
 
     constexpr NodeConfig TrRandom::config = NodeConfig(
-        "TrRandom",
+        TypeIds::TrRandom,
         "Random trigger",
         0,
         INPUTS_UNLIMITED,

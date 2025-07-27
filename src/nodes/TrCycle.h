@@ -20,7 +20,7 @@ namespace SparkWeaverCore {
     };
 
     constexpr NodeConfig TrCycle::config = NodeConfig(
-        "TrCycle",
+        TypeIds::TrCycle,
         "Cycle trigger",
         0,
         0,

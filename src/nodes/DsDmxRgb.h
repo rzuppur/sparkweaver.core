@@ -22,5 +22,5 @@ namespace SparkWeaverCore {
     };
 
     constexpr NodeConfig DsDmxRgb::config =
-        NodeConfig("DsDmxRgb", "DMX RGB", 1, 0, false, false, {{"address", 1, 510, 1}});
+        NodeConfig(TypeIds::DsDmxRgb, "DMX RGB", 1, 0, false, false, {{"address", 1, 510, 1}});
 }

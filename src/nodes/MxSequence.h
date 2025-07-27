@@ -52,5 +52,5 @@ namespace SparkWeaverCore {
     };
 
     constexpr NodeConfig MxSequence::config =
-        NodeConfig("MxSequence", "Color sequence", 1, INPUTS_UNLIMITED, true, false, {{"random", 0, 1, 0}});
+        NodeConfig(TypeIds::MxSequence, "Color sequence", 1, INPUTS_UNLIMITED, true, false, {{"random", 0, 1, 0}});
 }

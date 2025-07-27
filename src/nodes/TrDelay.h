@@ -34,5 +34,5 @@ namespace SparkWeaverCore {
     };
 
     constexpr NodeConfig TrDelay::config =
-        NodeConfig("TrDelay", "Delay trigger", 0, INPUTS_UNLIMITED, false, true, {{"delay_ticks", 1, 0xFF, 40}});
+        NodeConfig(TypeIds::TrDelay, "Delay trigger", 0, INPUTS_UNLIMITED, false, true, {{"delay_ticks", 1, 0xFF, 40}});
 }
