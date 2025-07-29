@@ -52,10 +52,10 @@ namespace SparkWeaverCore {
 
     constexpr NodeConfig FxPulse::config = NodeConfig(
         TypeIds::FxPulse,
-        "Pulse effect",
+        "Pulse",
         1,
         INPUTS_UNLIMITED,
-        true,
-        false,
-        {{"attack", 1, 0xFFFF, 5}, {"sustain", 1, 0xFFFF, 1}, {"decay", 1, 0xFFFF, 40}});
+        ColorOutputs::ENABLED,
+        TriggerOutputs::DISABLED,
+        {{"attack", 1, PARAM_MAX_VALUE, 5}, {"sustain", 1, PARAM_MAX_VALUE, 1}, {"decay", 1, PARAM_MAX_VALUE, 40}});
 }

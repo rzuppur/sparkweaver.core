@@ -33,10 +33,10 @@ namespace SparkWeaverCore {
 
     constexpr NodeConfig TrRandom::config = NodeConfig(
         TypeIds::TrRandom,
-        "Random trigger",
+        "Random interval trigger",
         0,
         INPUTS_UNLIMITED,
-        false,
-        true,
-        {{"min_time", 1, 0xFFFF, 40}, {"max_time", 1, 0xFFFF, 400}});
+        ColorOutputs::DISABLED,
+        TriggerOutputs::ENABLED,
+        {{"min_time", 1, PARAM_MAX_VALUE, 40}, {"max_time", 1, PARAM_MAX_VALUE, 400}});
 }

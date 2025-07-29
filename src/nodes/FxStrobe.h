@@ -40,10 +40,10 @@ namespace SparkWeaverCore {
 
     constexpr NodeConfig FxStrobe::config = NodeConfig(
         TypeIds::FxStrobe,
-        "Strobe effect",
+        "Strobe",
         1,
         INPUTS_UNLIMITED,
-        true,
-        false,
-        {{"flash_length", 1, 0xFFFF, 1}});
+        ColorOutputs::ENABLED,
+        TriggerOutputs::DISABLED,
+        {{"flash_length", 1, PARAM_MAX_VALUE, 1}});
 }

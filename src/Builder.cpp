@@ -79,12 +79,15 @@ namespace SparkWeaverCore {
 
                 // PARSE PARAMS
                 else if (params_left > 0) {
+                    // APPEND PARAM
                     if (params_left % 2 == 0) {
                         param_lsb = byte;
                     } else {
                         params.push_back(static_cast<uint16_t>(byte) << 8 | param_lsb);
                     }
                     --params_left;
+
+                    // EXECUTE COMMAND
                     if (params_left == 0) {
                         // CONNECTION
                         if (command == CommandIds::ColorInput || command == CommandIds::TriggerInput ||

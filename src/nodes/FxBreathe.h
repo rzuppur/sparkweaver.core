@@ -40,14 +40,14 @@ namespace SparkWeaverCore {
 
     constexpr NodeConfig FxBreathe::config = NodeConfig(
         TypeIds::FxBreathe,
-        "Breathe effect",
+        "Breathe",
         1,
         0,
-        true,
-        false,
+        ColorOutputs::ENABLED,
+        TriggerOutputs::DISABLED,
         {
-            {"cycle_length", 1, 0xFFFF, 400},
-            {"phase_offset", 0, 0xFFFF, 0},
+            {"cycle_length", 1, PARAM_MAX_VALUE, 400},
+            {"phase_offset", 0, PARAM_MAX_VALUE, 0},
             {"darken_amount", 0, 0xFF, 0xFF},
         });
 }

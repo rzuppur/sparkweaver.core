@@ -12,24 +12,35 @@
 #include "utils/string.h"
 
 namespace SparkWeaverCore {
-    constexpr int     DMX_PACKET_SIZE  = 513;
-    constexpr int     INPUTS_UNLIMITED = 32;
-    constexpr int     NODE_PARAMS_MAX  = 3;
-    constexpr uint8_t TREE_VERSION     = 0x01;
+    constexpr int      DMX_PACKET_SIZE  = 513;
+    constexpr int      INPUTS_UNLIMITED = 32;
+    constexpr int      PARAMS_MAX_COUNT = 3;
+    constexpr uint16_t PARAM_MAX_VALUE  = 0xFFFF;
+    constexpr uint8_t  TREE_VERSION     = 0x01;
+
+    enum class ColorOutputs {
+        DISABLED,
+        ENABLED,
+    };
+
+    enum class TriggerOutputs {
+        DISABLED,
+        ENABLED,
+    };
 
     namespace TypeIds {
-        constexpr uint8_t DsDmxRgb   = 0x00;
+        constexpr uint8_t DsDmxRgb = 0x00;
 
-        constexpr uint8_t FxBreathe  = 0x20;
-        constexpr uint8_t FxPulse    = 0x21;
-        constexpr uint8_t FxStrobe   = 0x22;
+        constexpr uint8_t FxBreathe = 0x20;
+        constexpr uint8_t FxPulse   = 0x21;
+        constexpr uint8_t FxStrobe  = 0x22;
 
         constexpr uint8_t MxAdd      = 0x40;
         constexpr uint8_t MxSequence = 0x41;
         constexpr uint8_t MxSubtract = 0x42;
         constexpr uint8_t MxSwitch   = 0x43;
 
-        constexpr uint8_t SrColor    = 0x60;
+        constexpr uint8_t SrColor = 0x60;
 
         constexpr uint8_t TrChance   = 0x80;
         constexpr uint8_t TrCycle    = 0x81;
@@ -72,14 +83,14 @@ namespace SparkWeaverCore {
     };
 
     struct NodeConfig {
-        std::array<char, 24>                   name{};
-        std::array<NodeParam, NODE_PARAMS_MAX> params{};
-        const uint8_t                          type_id;
-        const uint8_t                          params_count;
-        const uint8_t                          max_color_inputs;
-        const uint8_t                          max_trigger_inputs;
-        const bool                             enable_color_outputs;
-        const bool                             enable_trigger_outputs;
+        std::array<char, 24>                    name{};
+        std::array<NodeParam, PARAMS_MAX_COUNT> params{};
+        const uint8_t                           type_id;
+        const uint8_t                           params_count;
+        const uint8_t                           max_color_inputs;
+        const uint8_t                           max_trigger_inputs;
+        const ColorOutputs                      enable_color_outputs;
+        const TriggerOutputs                    enable_trigger_outputs;
 
         NodeConfig() = delete;
 
@@ -88,8 +99,8 @@ namespace SparkWeaverCore {
             const std::string_view                 _name,
             const uint8_t                          max_color_inputs,
             const uint8_t                          max_trigger_inputs,
-            const bool                             enable_color_outputs,
-            const bool                             enable_trigger_outputs,
+            const ColorOutputs                     enable_color_outputs,
+            const TriggerOutputs                   enable_trigger_outputs,
             const std::initializer_list<NodeParam> _params)
             : type_id(type_id)
             , params_count(_params.size())
@@ -99,19 +110,19 @@ namespace SparkWeaverCore {
             , enable_trigger_outputs(enable_trigger_outputs)
         {
             copyStringToArray(_name, name);
-            assert(params_count <= NODE_PARAMS_MAX);
-            auto _params_it = _params.begin();
-            for (size_t i = 0; _params_it != _params.end(); ++i) {
-                params[i] = *_params_it;
-                std::advance(_params_it, 1);
+            assert(params_count <= PARAMS_MAX_COUNT);
+            size_t i = 0;
+            for (const auto& param : _params) {
+                params[i++] = param;
             }
         }
     };
 
     class Node {
-        static inline NodeConfig default_config{0, "Empty node", 0, 0, false, false, {}};
+        static inline NodeConfig
+            default_config{0, "Empty node", 0, 0, ColorOutputs::DISABLED, TriggerOutputs::DISABLED, {}};
 
-        std::array<uint16_t, NODE_PARAMS_MAX> params{};
+        std::array<uint16_t, PARAMS_MAX_COUNT> params{};
 
     protected:
         // COLOR IN

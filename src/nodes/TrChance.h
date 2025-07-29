@@ -34,5 +34,5 @@ namespace SparkWeaverCore {
     };
 
     constexpr NodeConfig TrChance::config =
-        NodeConfig(TypeIds::TrChance, "Chance gate", 0, INPUTS_UNLIMITED, false, true, {{"chance", 1, 0xFFFF, 0x7FFF}});
+        NodeConfig(TypeIds::TrChance, "Stochastic gate", 0, INPUTS_UNLIMITED, ColorOutputs::DISABLED, TriggerOutputs::ENABLED, {{"chance", 1, PARAM_MAX_VALUE, 0x7FFF}});
 }

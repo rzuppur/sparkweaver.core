@@ -25,7 +25,7 @@ namespace SparkWeaverCore {
         "Color",
         0,
         0,
-        true,
-        false,
+        ColorOutputs::ENABLED,
+        TriggerOutputs::DISABLED,
         {{"red", 0, 0xFF, 0}, {"green", 0, 0xFF, 0}, {"blue", 0, 0xFF, 0}});
 }

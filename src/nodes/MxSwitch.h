@@ -56,7 +56,7 @@ namespace SparkWeaverCore {
         "Color switch",
         INPUTS_UNLIMITED,
         INPUTS_UNLIMITED,
-        true,
-        false,
+        ColorOutputs::ENABLED,
+        TriggerOutputs::DISABLED,
         {{"random", 0, 1, 0}});
 }

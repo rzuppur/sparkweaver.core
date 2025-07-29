@@ -21,10 +21,10 @@ namespace SparkWeaverCore {
 
     constexpr NodeConfig TrCycle::config = NodeConfig(
         TypeIds::TrCycle,
-        "Cycle trigger",
+        "Interval trigger",
         0,
         0,
-        false,
-        true,
-        {{"cycle_length", 1, 0xFFFF, 40}, {"phase_offset", 0, 0xFFFF, 0}});
+        ColorOutputs::DISABLED,
+        TriggerOutputs::ENABLED,
+        {{"cycle_length", 1, PARAM_MAX_VALUE, 40}, {"phase_offset", 0, PARAM_MAX_VALUE, 0}});
 }

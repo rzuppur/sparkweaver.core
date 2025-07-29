@@ -21,5 +21,6 @@ namespace SparkWeaverCore {
         }
     };
 
-    constexpr NodeConfig MxAdd::config = NodeConfig(TypeIds::MxAdd, "Mix add", INPUTS_UNLIMITED, 0, true, false, {});
+    constexpr NodeConfig MxAdd::config =
+        NodeConfig(TypeIds::MxAdd, "Add", INPUTS_UNLIMITED, 0, ColorOutputs::ENABLED, TriggerOutputs::DISABLED, {});
 }
