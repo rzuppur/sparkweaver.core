@@ -117,7 +117,8 @@ namespace SparkWeaverCore {
                                 p_node->setParam(i, params[i]);
                             }
                             all_nodes.push_back(p_node);
-                            if (!config->enable_color_outputs && !config->enable_trigger_outputs) {
+                            if (config->enable_color_outputs == ColorOutputs::DISABLED &&
+                                config->enable_trigger_outputs == TriggerOutputs::DISABLED) {
                                 root_nodes.push_back(p_node);
                             }
                         }
@@ -143,7 +144,8 @@ namespace SparkWeaverCore {
                             const auto p_node = makeNode(command);
                             if (!p_node) throw InvalidTreeException(chr_pos);
                             all_nodes.push_back(p_node);
-                            if (!config->enable_color_outputs && !config->enable_trigger_outputs) {
+                            if (config->enable_color_outputs == ColorOutputs::DISABLED &&
+                                config->enable_trigger_outputs == TriggerOutputs::DISABLED) {
                                 root_nodes.push_back(p_node);
                             }
                         }

@@ -22,10 +22,10 @@ int main()
             config.name.data(),
             config.max_color_inputs > 0 ? "->" : "  ",
             config.max_color_inputs,
-            config.enable_color_outputs ? "->" : "  ",
+            config.enable_color_outputs == SparkWeaverCore::ColorOutputs::ENABLED ? "->" : "  ",
             config.max_trigger_inputs > 0 ? "->" : "  ",
             config.max_trigger_inputs,
-            config.enable_trigger_outputs ? "->" : "  ");
+            config.enable_trigger_outputs == SparkWeaverCore::TriggerOutputs::ENABLED ? "->" : "  ");
         for (int i = 0; i < config.params_count; i++) {
             const auto param = config.params[i];
             std::cout << std::format(

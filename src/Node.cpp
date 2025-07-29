@@ -27,7 +27,7 @@ namespace SparkWeaverCore {
 
     void Node::addColorOutput(Node* const output)
     {
-        if (getConfig().enable_color_outputs) {
+        if (getConfig().enable_color_outputs == ColorOutputs::ENABLED) {
             color_outputs.push_back(output);
         } else {
             throw InvalidConnectionException(getName(), "color_outputs disabled");
@@ -59,7 +59,7 @@ namespace SparkWeaverCore {
 
     void Node::addTriggerOutput(Node* const output)
     {
-        if (getConfig().enable_trigger_outputs) {
+        if (getConfig().enable_trigger_outputs == TriggerOutputs::ENABLED) {
             trigger_outputs.push_back(output);
         } else {
             throw InvalidConnectionException(getName(), "trigger_outputs disabled");
