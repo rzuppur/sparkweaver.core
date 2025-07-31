@@ -21,8 +21,8 @@ namespace SparkWeaverCore {
         {
             if (tick != cache_tick) {
                 cache_tick = tick;
-                for (auto* trigger : trigger_inputs) {
-                    if (trigger->getTrigger(tick, this)) {
+                for (auto* trigger_input : trigger_inputs) {
+                    if (trigger_input->getTrigger(tick, this)) {
                         flash_tick = tick;
                     }
                 }
@@ -42,7 +42,7 @@ namespace SparkWeaverCore {
         TypeIds::FxStrobe,
         "Strobe",
         1,
-        INPUTS_UNLIMITED,
+        MAXIMUM_CONNECTIONS,
         ColorOutputs::ENABLED,
         TriggerOutputs::DISABLED,
         {{"flash_length", 1, PARAM_MAX_VALUE, 1}});

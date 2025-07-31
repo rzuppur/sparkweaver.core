@@ -31,7 +31,7 @@ namespace SparkWeaverCore {
     constexpr NodeConfig DsDmxRgb::config = NodeConfig(
         TypeIds::DsDmxRgb,
         "DMX RGB",
-        INPUTS_UNLIMITED,
+        MAXIMUM_CONNECTIONS,
         0,
         ColorOutputs::DISABLED,
         TriggerOutputs::DISABLED,

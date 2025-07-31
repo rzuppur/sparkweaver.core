@@ -26,9 +26,9 @@ namespace SparkWeaverCore {
             if (tick != cache_tick) {
                 cache_tick = tick;
                 if (!color_inputs.empty()) {
-                    const Color color = color_inputs.at(0)->getColor(tick, this);
-                    const auto  cycle_value =
-                        static_cast<float>(0.5 * (1.0 + std::sin((phase_offset + tick) * 2.0 * M_PI / cycle_length)));
+                    const Color color       = color_inputs.at(0)->getColor(tick, this);
+                    const auto  cycle_value = static_cast<float>(
+                        0.5 * (1.0 + std::sin((phase_offset + tick) * 2.0 * std::numbers::pi / cycle_length)));
                     cache_color = color * (1 - darken_amount + cycle_value * darken_amount);
                 } else {
                     cache_color = Colors::BLACK;

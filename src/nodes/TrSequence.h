@@ -26,8 +26,8 @@ namespace SparkWeaverCore {
             if (tick != cache_tick) {
                 cache_tick    = tick;
                 cache_trigger = false;
-                for (auto* trigger : trigger_inputs) {
-                    if (trigger->getTrigger(tick, this)) {
+                for (auto* trigger_input : trigger_inputs) {
+                    if (trigger_input->getTrigger(tick, this)) {
                         cache_trigger = true;
                     }
                 }
@@ -52,7 +52,7 @@ namespace SparkWeaverCore {
         TypeIds::TrSequence,
         "Trigger sequence",
         0,
-        INPUTS_UNLIMITED,
+        MAXIMUM_CONNECTIONS,
         ColorOutputs::DISABLED,
         TriggerOutputs::ENABLED,
         {{"random", 0, 1, 0}});

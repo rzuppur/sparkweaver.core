@@ -1,6 +1,5 @@
 #pragma once
 
-#include <algorithm>
 #include <cstdint>
 
 namespace SparkWeaverCore {
@@ -8,10 +7,10 @@ namespace SparkWeaverCore {
     public:
         uint8_t r, g, b;
 
-        constexpr Color(const uint8_t red, const uint8_t green, const uint8_t blue) :
-            r(red),
-            g(green),
-            b(blue)
+        constexpr Color(const uint8_t red, const uint8_t green, const uint8_t blue)
+            : r(red)
+            , g(green)
+            , b(blue)
         {
         }
 
@@ -34,17 +33,20 @@ namespace SparkWeaverCore {
         constexpr Color operator*(const Color& other) const
         {
             return {
-                static_cast<uint8_t>(std::min(0xFF, static_cast<int>(r) * static_cast<int>(other.r) / 0xFF)),
-                static_cast<uint8_t>(std::min(0xFF, static_cast<int>(g) * static_cast<int>(other.g) / 0xFF)),
-                static_cast<uint8_t>(std::min(0xFF, static_cast<int>(b) * static_cast<int>(other.b) / 0xFF))};
+                static_cast<uint8_t>((static_cast<uint16_t>(r) * other.r + 127) / 255),
+                static_cast<uint8_t>((static_cast<uint16_t>(g) * other.g + 127) / 255),
+                static_cast<uint8_t>((static_cast<uint16_t>(b) * other.b + 127) / 255)};
         }
 
         constexpr Color operator*(const float factor) const
         {
+            auto clamp = [](const float value) constexpr -> uint8_t {
+                return value >= 255.0f ? 255 : static_cast<uint8_t>(value + 0.5f);
+            };
             return {
-                static_cast<uint8_t>(std::min(static_cast<float>(0xFF), static_cast<float>(r) * factor)),
-                static_cast<uint8_t>(std::min(static_cast<float>(0xFF), static_cast<float>(g) * factor)),
-                static_cast<uint8_t>(std::min(static_cast<float>(0xFF), static_cast<float>(b) * factor))};
+                clamp(static_cast<float>(r) * factor),
+                clamp(static_cast<float>(g) * factor),
+                clamp(static_cast<float>(b) * factor)};
         }
     };
 

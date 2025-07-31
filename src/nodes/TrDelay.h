@@ -34,5 +34,5 @@ namespace SparkWeaverCore {
     };
 
     constexpr NodeConfig TrDelay::config =
-        NodeConfig(TypeIds::TrDelay, "Delay", 0, INPUTS_UNLIMITED, ColorOutputs::DISABLED, TriggerOutputs::ENABLED, {{"delay_ticks", 1, 0xFF, 40}});
+        NodeConfig(TypeIds::TrDelay, "Delay", 0, MAXIMUM_CONNECTIONS, ColorOutputs::DISABLED, TriggerOutputs::ENABLED, {{"delay_ticks", 1, 0xFF, 40}});
 }

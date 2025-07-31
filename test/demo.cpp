@@ -14,7 +14,7 @@ int main()
     SetConsoleOutputCP(CP_UTF8);
 #endif
 
-    std::cout << "SparkWeaverCore\n\nNODE TYPES\n\n";
+    std::cout << "SparkWeaverCore\n\nNODE TYPES v" << std::to_string(SparkWeaverCore::TREE_VERSION) << "\n\n";
     for (const auto configs = SparkWeaverCore::getNodeConfigs(); const auto& config : configs) {
         std::cout << std::format(
             "{:02X} {:<24} C {}{:0>2}{}   T {}{:0>2}{}\n",

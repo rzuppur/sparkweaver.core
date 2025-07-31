@@ -26,8 +26,8 @@ namespace SparkWeaverCore {
             if (tick != cache_tick) {
                 cache_tick          = tick;
                 bool trigger_active = false;
-                for (auto* trigger : trigger_inputs) {
-                    if (trigger->getTrigger(tick, this)) {
+                for (auto* trigger_input : trigger_inputs) {
+                    if (trigger_input->getTrigger(tick, this)) {
                         trigger_active = true;
                     }
                 }
@@ -54,8 +54,8 @@ namespace SparkWeaverCore {
     constexpr NodeConfig MxSwitch::config = NodeConfig(
         TypeIds::MxSwitch,
         "Color switch",
-        INPUTS_UNLIMITED,
-        INPUTS_UNLIMITED,
+        MAXIMUM_CONNECTIONS,
+        MAXIMUM_CONNECTIONS,
         ColorOutputs::ENABLED,
         TriggerOutputs::DISABLED,
         {{"random", 0, 1, 0}});

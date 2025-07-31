@@ -21,15 +21,19 @@ namespace SparkWeaverCore {
         {
             if (tick != cache_tick) {
                 cache_tick = tick;
-                for (auto* trigger : trigger_inputs) {
-                    if (trigger->getTrigger(tick, this)) {
-                        pulse_tick = tick;
+
+                const auto attack    = getParam(0);
+                const auto sustain   = getParam(1);
+                const auto decay     = getParam(2);
+                const auto retrigger = getParam(3);
+                const auto ignore_triggers =
+                    !retrigger && tick >= pulse_tick && pulse_tick + attack + sustain + decay > tick;
+
+                for (auto* trigger_input : trigger_inputs) {
+                    if (trigger_input->getTrigger(tick, this)) {
+                        if (!ignore_triggers) pulse_tick = tick;
                     }
                 }
-
-                const auto attack  = getParam(0);
-                const auto sustain = getParam(1);
-                const auto decay   = getParam(2);
 
                 const auto relative_tick = tick - pulse_tick;
                 cache_color              = Colors::BLACK;
@@ -54,8 +58,11 @@ namespace SparkWeaverCore {
         TypeIds::FxPulse,
         "Pulse",
         1,
-        INPUTS_UNLIMITED,
+        MAXIMUM_CONNECTIONS,
         ColorOutputs::ENABLED,
         TriggerOutputs::DISABLED,
-        {{"attack", 1, PARAM_MAX_VALUE, 5}, {"sustain", 1, PARAM_MAX_VALUE, 1}, {"decay", 1, PARAM_MAX_VALUE, 40}});
+        {{"attack", 1, PARAM_MAX_VALUE, 5},
+         {"sustain", 1, PARAM_MAX_VALUE, 1},
+         {"decay", 1, PARAM_MAX_VALUE, 40},
+         {"retrigger", 0, 1, 1}});
 }

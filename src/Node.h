@@ -12,11 +12,11 @@
 #include "utils/string.h"
 
 namespace SparkWeaverCore {
-    constexpr int      DMX_PACKET_SIZE  = 513;
-    constexpr int      INPUTS_UNLIMITED = 32;
-    constexpr int      PARAMS_MAX_COUNT = 3;
-    constexpr uint16_t PARAM_MAX_VALUE  = 0xFFFF;
-    constexpr uint8_t  TREE_VERSION     = 0x01;
+    constexpr int      DMX_PACKET_SIZE     = 513;
+    constexpr int      MAXIMUM_CONNECTIONS = 32;
+    constexpr int      PARAMS_MAX_COUNT    = 4;
+    constexpr uint16_t PARAM_MAX_VALUE     = UINT16_MAX;
+    constexpr uint8_t  TREE_VERSION        = 0x02;
 
     enum class ColorOutputs {
         DISABLED,
@@ -240,7 +240,7 @@ namespace SparkWeaverCore {
         {
         }
 
-        InvalidTreeException(const int chr_pos)
+        explicit InvalidTreeException(const int chr_pos)
             : message("Tree @ " + std::to_string(chr_pos) + ": Error")
         {
         }
