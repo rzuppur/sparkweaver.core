@@ -55,6 +55,6 @@ namespace SparkWeaverCore {
         [[nodiscard]] uint8_t* tick() noexcept;
 
         std::vector<uint8_t> listExternalTriggers() const noexcept;
-        void triggerExternalTrigger(uint8_t id) const noexcept;
+        void                 triggerExternalTrigger(uint8_t id) const noexcept;
     };
 }
