@@ -40,7 +40,8 @@ namespace SparkWeaverCore {
         constexpr uint8_t MxSubtract = 0x42;
         constexpr uint8_t MxSwitch   = 0x43;
 
-        constexpr uint8_t SrColor = 0x60;
+        constexpr uint8_t SrColor   = 0x60;
+        constexpr uint8_t SrTrigger = 0x61;
 
         constexpr uint8_t TrChance   = 0x80;
         constexpr uint8_t TrCycle    = 0x81;
@@ -181,8 +182,13 @@ namespace SparkWeaverCore {
         [[nodiscard]] virtual bool getTrigger(uint32_t tick, const Node* requested_by) noexcept { return false; }
 
         /**
+         * @brief Send external trigger.
+         * @param tick Current tick number
+         */
+        virtual void trigger(uint32_t tick) noexcept {}
+
+        /**
          * @brief Evaluate the node tree and render it to a DMX data array.
-         *
          * @param tick Current tick number
          * @param p_dmx_data Pointer to 513 bytes long array corresponding to DMX addresses, first byte is unused
          */

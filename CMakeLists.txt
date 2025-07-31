@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_library(sparkweaver_core
         src/Node.cpp
-        src/Builder.cpp)
+        src/Engine.cpp)
 
 target_include_directories(sparkweaver_core
         PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include

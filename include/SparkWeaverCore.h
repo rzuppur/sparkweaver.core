@@ -12,6 +12,7 @@
 #include "../src/nodes/MxSubtract.h"
 #include "../src/nodes/MxSwitch.h"
 #include "../src/nodes/SrColor.h"
+#include "../src/nodes/SrTrigger.h"
 #include "../src/nodes/TrChance.h"
 #include "../src/nodes/TrCycle.h"
 #include "../src/nodes/TrDelay.h"
@@ -31,6 +32,7 @@ namespace SparkWeaverCore {
             MxSubtract::config,
             MxSwitch::config,
             SrColor::config,
+            SrTrigger::config,
             TrChance::config,
             TrCycle::config,
             TrDelay::config,
@@ -39,7 +41,7 @@ namespace SparkWeaverCore {
         };
     }
 
-    class Builder {
+    class Engine {
         uint32_t           current_tick              = 0;
         uint8_t            dmx_data[DMX_PACKET_SIZE] = {};
         std::vector<Node*> root_nodes;
@@ -51,5 +53,8 @@ namespace SparkWeaverCore {
         void build(const std::vector<uint8_t>& tree);
 
         [[nodiscard]] uint8_t* tick() noexcept;
+
+        std::vector<uint8_t> listExternalTriggers() const noexcept;
+        void triggerExternalTrigger(uint8_t id) const noexcept;
     };
 }

@@ -1,4 +1,5 @@
 #include <cstring>
+#include <set>
 
 #include "Node.h"
 #include "SparkWeaverCore.h"
@@ -35,6 +36,7 @@ namespace SparkWeaverCore {
                 {MxSubtract::config.type_id, []() -> Node* { return new MxSubtract(); }},
                 {MxSwitch::config.type_id, []() -> Node* { return new MxSwitch(); }},
                 {SrColor::config.type_id, []() -> Node* { return new SrColor(); }},
+                {SrTrigger::config.type_id, []() -> Node* { return new SrTrigger(); }},
                 {TrChance::config.type_id, []() -> Node* { return new TrChance(); }},
                 {TrCycle::config.type_id, []() -> Node* { return new TrCycle(); }},
                 {TrDelay::config.type_id, []() -> Node* { return new TrDelay(); }},
@@ -50,7 +52,7 @@ namespace SparkWeaverCore {
         }
     }
 
-    void Builder::resetNodeTree() noexcept
+    void Engine::resetNodeTree() noexcept
     {
         for (const auto all_node : all_nodes) {
             delete all_node;
@@ -59,7 +61,7 @@ namespace SparkWeaverCore {
         root_nodes.clear();
     }
 
-    void Builder::build(const std::vector<uint8_t>& tree)
+    void Engine::build(const std::vector<uint8_t>& tree)
     {
         current_tick = 0;
         resetNodeTree();
@@ -168,7 +170,7 @@ namespace SparkWeaverCore {
      * @brief Increment global clock and execute all nodes
      * @return Pointer to 513 bytes long DMX data array output, byte number corresponds to DMX address, 0 is unused
      */
-    [[nodiscard]] uint8_t* Builder::tick() noexcept
+    [[nodiscard]] uint8_t* Engine::tick() noexcept
     {
         memset(dmx_data, 0, sizeof(dmx_data));
         for (const auto root_node : root_nodes) {
@@ -176,5 +178,27 @@ namespace SparkWeaverCore {
         }
         current_tick++;
         return dmx_data;
+    }
+
+    std::vector<uint8_t> Engine::listExternalTriggers() const noexcept
+    {
+        std::set<uint8_t> ids;
+        for (const auto& node : all_nodes) {
+            if (node->getConfig().type_id == TypeIds::SrTrigger) {
+                ids.insert(node->getParam(0));
+            }
+        }
+        return {ids.begin(), ids.end()};
+    }
+
+    void Engine::triggerExternalTrigger(const uint8_t id) const noexcept
+    {
+        for (const auto& node : all_nodes) {
+            if (node->getConfig().type_id == TypeIds::SrTrigger) {
+                if (node->getParam(0) == id) {
+                    node->trigger(current_tick);
+                }
+            }
+        }
     }
 }

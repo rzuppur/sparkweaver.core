@@ -39,8 +39,8 @@ int main()
 
     std::cout << "\n\nSMOKE TEST\n\nexpected FF 80 40 00\nresult   ";
     try {
-        SparkWeaverCore::Builder builder;
-        builder.build(
+        SparkWeaverCore::Engine engine;
+        engine.build(
             {SparkWeaverCore::TREE_VERSION,
              SparkWeaverCore::TypeIds::DsDmxRgb,
              0x01,
@@ -62,7 +62,7 @@ int main()
              0x00,
              0x01,
              0x00});
-        const auto data = builder.tick();
+        const auto data = engine.tick();
         std::cout << std::format("{:02X} {:02X} {:02X} {:02X}\n", data[1], data[2], data[3], data[4]);
     } catch (const std::exception& e) {
         std::cout << e.what() << "\n";
