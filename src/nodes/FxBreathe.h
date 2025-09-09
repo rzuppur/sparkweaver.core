@@ -2,7 +2,6 @@
 
 #include <cmath>
 #include <cstdint>
-#include <numbers>
 
 #include "../Node.h"
 
@@ -20,16 +19,17 @@ namespace SparkWeaverCore {
 
         [[nodiscard]] Color getColor(const uint32_t tick, const Node* requested_by) noexcept override
         {
-            const uint16_t cycle_length  = getParam(0);
-            const uint16_t phase_offset  = getParam(1);
-            const float    darken_amount = static_cast<float>(getParam(2)) / 0xFF;
+            constexpr static double pi            = 3.14159265358979323846;
+            const uint16_t          cycle_length  = getParam(0);
+            const uint16_t          phase_offset  = getParam(1);
+            const float             darken_amount = static_cast<float>(getParam(2)) / 0xFF;
 
             if (tick != cache_tick) {
                 cache_tick = tick;
                 if (!color_inputs.empty()) {
                     const Color color       = color_inputs.at(0)->getColor(tick, this);
                     const auto  cycle_value = static_cast<float>(
-                        0.5 * (1.0 + std::sin((phase_offset + tick) * 2.0 * std::numbers::pi / cycle_length)));
+                        0.5 * (1.0 + std::sin((phase_offset + tick) * 2.0 * pi / cycle_length)));
                     cache_color = color * (1 - darken_amount + cycle_value * darken_amount);
                 } else {
                     cache_color = Colors::BLACK;
