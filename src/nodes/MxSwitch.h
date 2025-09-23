@@ -9,10 +9,9 @@ namespace SparkWeaverCore {
      * @brief On trigger chooses a single color input to be passed through to all color outputs.
      */
     class MxSwitch final : public Node {
-        size_t   active_index     = 0;
-        uint32_t cache_tick       = UINT32_MAX;
-        Color    cache_color      = Colors::BLACK;
-        bool     is_first_trigger = true;
+        size_t   active_index = 0;
+        uint32_t cache_tick   = UINT32_MAX;
+        Color    cache_color  = Colors::BLACK;
 
     public:
         static const NodeConfig config;
@@ -36,12 +35,7 @@ namespace SparkWeaverCore {
                         if (getParam(0) == 1) {
                             active_index = random(0, static_cast<int>(color_inputs.size()) - 1);
                         } else {
-                            if (is_first_trigger) {
-                                is_first_trigger = false;
-                                active_index     = 0;
-                            } else {
-                                active_index = (active_index + 1) % color_inputs.size();
-                            }
+                            active_index = (active_index + 1) % color_inputs.size();
                         }
                     }
                     cache_color = color_inputs.at(active_index)->getColor(tick, this);
