@@ -5,6 +5,10 @@
 #include "../Node.h"
 
 namespace SparkWeaverCore {
+    /**
+     * @class FxStrobe
+     * @brief On trigger pulse input color for specified number of ticks
+     */
     class FxStrobe final : public Node {
         uint32_t flash_tick  = UINT32_MAX;
         uint32_t cache_tick  = UINT32_MAX;

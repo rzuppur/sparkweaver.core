@@ -3,6 +3,10 @@
 #include "../Node.h"
 
 namespace SparkWeaverCore {
+    /**
+     * @class MxSubtract
+     * @brief Outputs the first color/trigger minus all other color/trigger inputs
+     */
     class MxSubtract final : public Node {
         uint32_t cache_color_tick = UINT32_MAX;
         Color    cache_color      = Colors::BLACK;

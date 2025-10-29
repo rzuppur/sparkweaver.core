@@ -3,6 +3,10 @@
 #include "../Node.h"
 
 namespace SparkWeaverCore {
+    /**
+     * @class SrTrigger
+     * @brief Outputs external triggers
+     */
     class SrTrigger final : public Node {
         uint32_t next_trigger = UINT32_MAX;
 

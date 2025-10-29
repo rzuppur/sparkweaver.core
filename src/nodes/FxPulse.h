@@ -5,6 +5,10 @@
 #include "../Node.h"
 
 namespace SparkWeaverCore {
+    /**
+     * @class FxPulse
+     * @brief On trigger pulse input color with linear attack, sustain and decay
+     */
     class FxPulse final : public Node {
         uint32_t pulse_tick  = UINT32_MAX;
         uint32_t cache_tick  = UINT32_MAX;

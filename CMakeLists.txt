@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.30)
-project(sparkweaver_core)
+project(sparkweaver_core LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 

@@ -4,6 +4,10 @@
 #include "../utils/random.h"
 
 namespace SparkWeaverCore {
+    /**
+     * @class TrChance
+     * @brief Outputs input trigger based on set probability
+     */
     class TrChance final : public Node {
         uint32_t cache_tick    = UINT32_MAX;
         bool     cache_trigger = false;
@@ -33,6 +37,12 @@ namespace SparkWeaverCore {
         }
     };
 
-    constexpr NodeConfig TrChance::config =
-        NodeConfig(TypeIds::TrChance, "Stochastic gate", 0, MAXIMUM_CONNECTIONS, ColorOutputs::DISABLED, TriggerOutputs::ENABLED, {{"chance", 1, PARAM_MAX_VALUE, 0x7FFF}});
+    constexpr NodeConfig TrChance::config = NodeConfig(
+        TypeIds::TrChance,
+        "Stochastic gate",
+        0,
+        MAXIMUM_CONNECTIONS,
+        ColorOutputs::DISABLED,
+        TriggerOutputs::ENABLED,
+        {{"chance", 1, PARAM_MAX_VALUE, 0x7FFF}});
 }

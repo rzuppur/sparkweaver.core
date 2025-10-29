@@ -3,6 +3,10 @@
 #include "../Node.h"
 
 namespace SparkWeaverCore {
+    /**
+     * @class TrCycle
+     * @brief Outputs a trigger based on configured interval
+     */
     class TrCycle final : public Node {
     public:
         static const NodeConfig config;

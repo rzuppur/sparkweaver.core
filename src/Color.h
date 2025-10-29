@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <cstdint>
 
 namespace SparkWeaverCore {
@@ -41,13 +42,15 @@ namespace SparkWeaverCore {
         constexpr Color operator*(const float factor) const
         {
             auto clamp = [](const float value) constexpr -> uint8_t {
-                return value >= 255.0f ? 255 : static_cast<uint8_t>(value + 0.5f);
+                return value >= 255.0f ? 255 : static_cast<uint8_t>(lround(value));
             };
             return {
                 clamp(static_cast<float>(r) * factor),
                 clamp(static_cast<float>(g) * factor),
                 clamp(static_cast<float>(b) * factor)};
         }
+
+        constexpr bool operator==(const Color& other) const { return r == other.r && g == other.g && b == other.b; }
     };
 
     namespace Colors {

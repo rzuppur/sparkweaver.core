@@ -1,4 +1,5 @@
-.idea
+.idea/
 .idea_modules/
 cmake-build-*/
 out/
+docs/

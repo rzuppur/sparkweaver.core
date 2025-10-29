@@ -3,6 +3,10 @@
 #include "../Node.h"
 
 namespace SparkWeaverCore {
+    /**
+     * @class MxAdd
+     * @brief Outputs the sum of all input colors and/or all input triggers
+     */
     class MxAdd final : public Node {
         uint32_t cache_color_tick = UINT32_MAX;
         Color    cache_color      = Colors::BLACK;

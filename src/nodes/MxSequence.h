@@ -6,7 +6,7 @@
 namespace SparkWeaverCore {
     /**
      * @class MxSequence
-     * @brief Sends color input to a single color output, change output with a trigger.
+     * @brief Sends input color to a single color output, changes output on a trigger.
      */
     class MxSequence final : public Node {
         size_t   active_index     = 0;

@@ -166,10 +166,6 @@ namespace SparkWeaverCore {
         }
     }
 
-    /**
-     * @brief Increment global clock and execute all nodes
-     * @return Pointer to 513 bytes long DMX data array output, byte number corresponds to DMX address, 0 is unused
-     */
     [[nodiscard]] uint8_t* Engine::tick() noexcept
     {
         memset(dmx_data, 0, sizeof(dmx_data));

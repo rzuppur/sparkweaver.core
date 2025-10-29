@@ -4,6 +4,10 @@
 #include "../utils/random.h"
 
 namespace SparkWeaverCore {
+    /**
+     * @class TrRandom
+     * @brief Outputs a trigger after a random interval, after input trigger or with no input triggers continuously
+     */
     class TrRandom final : public Node {
     public:
         static const NodeConfig config;

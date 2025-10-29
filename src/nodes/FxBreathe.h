@@ -6,6 +6,10 @@
 #include "../Node.h"
 
 namespace SparkWeaverCore {
+    /**
+     * @class FxBreathe
+     * @brief Sinusoidal dimming of input color
+     */
     class FxBreathe final : public Node {
         uint32_t cache_tick  = UINT32_MAX;
         Color    cache_color = Colors::BLACK;

@@ -3,6 +3,10 @@
 #include "../Node.h"
 
 namespace SparkWeaverCore {
+     /**
+     * @class TrDelay
+     * @brief Delays input trigger a set number of ticks
+     */
     class TrDelay final : public Node {
     public:
         static const NodeConfig config;
@@ -33,6 +37,12 @@ namespace SparkWeaverCore {
         }
     };
 
-    constexpr NodeConfig TrDelay::config =
-        NodeConfig(TypeIds::TrDelay, "Delay", 0, MAXIMUM_CONNECTIONS, ColorOutputs::DISABLED, TriggerOutputs::ENABLED, {{"delay_ticks", 1, 0xFF, 40}});
+    constexpr NodeConfig TrDelay::config = NodeConfig(
+        TypeIds::TrDelay,
+        "Delay",
+        0,
+        MAXIMUM_CONNECTIONS,
+        ColorOutputs::DISABLED,
+        TriggerOutputs::ENABLED,
+        {{"delay_ticks", 1, 0xFF, 40}});
 }

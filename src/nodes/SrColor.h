@@ -3,6 +3,10 @@
 #include "../Node.h"
 
 namespace SparkWeaverCore {
+    /**
+     * @class SrColor
+     * @brief Outputs a static color
+     */
     class SrColor final : public Node {
     public:
         static const NodeConfig config;
