@@ -1,21 +1,24 @@
 #pragma once
 
-#include "../Node.h"
+#include "../NodeLink.h"
 
 namespace SparkWeaverCore {
     /**
      * @class TrCycle
-     * @brief Outputs a trigger based on configured interval
+     * @brief Outputs a trigger based on configured interval.
      */
     class TrCycle final : public Node {
     public:
         static const NodeConfig config;
 
+        explicit TrCycle(const std::array<uint16_t, PARAMS_MAX_COUNT> params)
+            : Node(params)
+        {
+        }
+
         [[nodiscard]] const NodeConfig& getConfig() const noexcept override { return config; }
 
-        TrCycle() { init(); }
-
-        [[nodiscard]] bool getTrigger(const uint32_t tick, const Node* requested_by) noexcept override
+        [[nodiscard]] bool getTrigger(const uint32_t tick, const uint8_t index) noexcept override
         {
             const uint16_t cycle_length = getParam(0);
             const uint16_t phase_offset = getParam(1);

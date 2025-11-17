@@ -1,36 +1,38 @@
 #pragma once
 
-#include "../Node.h"
+#include "../NodeLink.h"
 #include "../utils/random.h"
 
 namespace SparkWeaverCore {
     /**
      * @class TrRandom
-     * @brief Outputs a trigger after a random interval, after input trigger or with no input triggers continuously
+     * @brief Outputs a trigger after a random interval following an input trigger or with no inputs continuously.
      */
     class TrRandom final : public Node {
+        uint32_t next_trigger = UINT32_MAX;
+
     public:
         static const NodeConfig config;
 
+        explicit TrRandom(const std::array<uint16_t, PARAMS_MAX_COUNT> params)
+            : Node(params)
+        {
+        }
+
         [[nodiscard]] const NodeConfig& getConfig() const noexcept override { return config; }
 
-        uint32_t next_trigger = UINT32_MAX;
-
-        TrRandom() { init(); }
-
-        [[nodiscard]] bool getTrigger(const uint32_t tick, const Node* requested_by) noexcept override
+        [[nodiscard]] bool getTrigger(const uint32_t tick, const uint8_t index) noexcept override
         {
-            bool set_new_trigger = trigger_inputs.empty() ? tick > next_trigger || next_trigger == UINT32_MAX : false;
+            const auto min_time = getParam(0);
+            const auto max_time = getParam(1);
+
+            auto trigger = false;
+            if (trigger_inputs.empty()) trigger = tick > next_trigger || next_trigger == UINT32_MAX;
             for (auto* trigger_input : trigger_inputs) {
-                if (trigger_input->getTrigger(tick, this)) {
-                    set_new_trigger = true;
-                }
+                trigger = trigger_input->get(tick) || trigger;
             }
-            if (set_new_trigger) {
-                const uint16_t min_time = getParam(0) - 1;
-                const uint16_t max_time = getParam(1) - 1;
-                next_trigger            = tick + random(min_time, max_time);
-            }
+
+            if (trigger) next_trigger = tick + random(min_time, max_time);
             return tick == next_trigger;
         }
     };
@@ -42,5 +44,5 @@ namespace SparkWeaverCore {
         MAXIMUM_CONNECTIONS,
         ColorOutputs::DISABLED,
         TriggerOutputs::ENABLED,
-        {{"min_time", 1, PARAM_MAX_VALUE, 40}, {"max_time", 1, PARAM_MAX_VALUE, 400}});
+        {{"min_time", 0, PARAM_MAX_VALUE, 40}, {"max_time", 0, PARAM_MAX_VALUE, 400}});
 }

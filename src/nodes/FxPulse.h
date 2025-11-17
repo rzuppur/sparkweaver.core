@@ -2,59 +2,50 @@
 
 #include <cstdint>
 
-#include "../Node.h"
+#include "../NodeLink.h"
 
 namespace SparkWeaverCore {
     /**
      * @class FxPulse
-     * @brief On trigger pulse input color with linear attack, sustain and decay
+     * @brief On trigger pulse input color with linear attack, sustain and decay.
      */
     class FxPulse final : public Node {
-        uint32_t pulse_tick  = UINT32_MAX;
-        uint32_t cache_tick  = UINT32_MAX;
-        Color    cache_color = Colors::BLACK;
+        uint32_t pulse_tick = UINT32_MAX;
 
     public:
         static const NodeConfig config;
 
+        explicit FxPulse(const std::array<uint16_t, PARAMS_MAX_COUNT> params)
+            : Node(params)
+        {
+        }
+
         [[nodiscard]] const NodeConfig& getConfig() const noexcept override { return config; }
 
-        FxPulse() { init(); }
-
-        [[nodiscard]] Color getColor(const uint32_t tick, const Node* requested_by) noexcept override
+        [[nodiscard]] Color getColor(const uint32_t tick, const uint8_t index) noexcept override
         {
-            if (tick != cache_tick) {
-                cache_tick = tick;
+            const auto attack           = getParam(0);
+            const auto sustain          = getParam(1);
+            const auto decay            = getParam(2);
+            const auto retrigger        = getParam(3);
+            const auto relative_tick    = tick - pulse_tick;
+            const auto retrigger_ignore = !retrigger && tick >= pulse_tick && attack + sustain + decay > relative_tick;
 
-                const auto attack    = getParam(0);
-                const auto sustain   = getParam(1);
-                const auto decay     = getParam(2);
-                const auto retrigger = getParam(3);
-                const auto ignore_triggers =
-                    !retrigger && tick >= pulse_tick && pulse_tick + attack + sustain + decay > tick;
-
-                for (auto* trigger_input : trigger_inputs) {
-                    if (trigger_input->getTrigger(tick, this)) {
-                        if (!ignore_triggers) pulse_tick = tick;
-                    }
-                }
-
-                const auto relative_tick = tick - pulse_tick;
-                cache_color              = Colors::BLACK;
-
-                if (!color_inputs.empty() && tick >= pulse_tick) {
-                    const auto color = color_inputs.at(0)->getColor(tick, this);
-                    if (relative_tick < attack) {
-                        cache_color = color * (static_cast<float>(relative_tick) / static_cast<float>(attack));
-                    } else if (relative_tick < attack + sustain) {
-                        cache_color = color;
-                    } else if (relative_tick < attack + sustain + decay) {
-                        cache_color = color * (1 - static_cast<float>(relative_tick - attack - sustain) /
-                                                       static_cast<float>(decay));
-                    }
+            for (auto* trigger_input : trigger_inputs) {
+                if (trigger_input->get(tick)) {
+                    if (!retrigger_ignore) pulse_tick = tick;
                 }
             }
-            return cache_color;
+
+            if (color_inputs.empty()) return Colors::BLACK;
+            const auto color = color_inputs.at(0)->get(tick);
+
+            if (tick < pulse_tick || tick >= pulse_tick + attack + sustain + decay) return Colors::BLACK;
+            if (relative_tick < attack) return color * (static_cast<float>(relative_tick) / static_cast<float>(attack));
+            if (relative_tick < attack + sustain) return color;
+            if (relative_tick < attack + sustain + decay)
+                return color * (1 - static_cast<float>(relative_tick - attack - sustain) / static_cast<float>(decay));
+            return Colors::BLACK;
         }
     };
 

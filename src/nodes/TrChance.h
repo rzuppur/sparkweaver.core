@@ -1,39 +1,41 @@
 #pragma once
 
-#include "../Node.h"
+#include "../NodeLink.h"
 #include "../utils/random.h"
 
 namespace SparkWeaverCore {
     /**
      * @class TrChance
-     * @brief Outputs input trigger based on set probability
+     * @brief Outputs input trigger based on set probability.
      */
     class TrChance final : public Node {
-        uint32_t cache_tick    = UINT32_MAX;
-        bool     cache_trigger = false;
+        uint32_t last_tick  = UINT32_MAX;
+        bool     last_value = false;
 
     public:
         static const NodeConfig config;
 
+        explicit TrChance(const std::array<uint16_t, PARAMS_MAX_COUNT> params)
+            : Node(params)
+        {
+        }
+
         [[nodiscard]] const NodeConfig& getConfig() const noexcept override { return config; }
 
-        TrChance() { init(); }
-
-        [[nodiscard]] bool getTrigger(const uint32_t tick, const Node* requested_by) noexcept override
+        [[nodiscard]] bool getTrigger(const uint32_t tick, const uint8_t index) noexcept override
         {
-            if (tick != cache_tick) {
-                cache_tick    = tick;
-                cache_trigger = false;
+            const auto chance = getParam(0);
+
+            if (tick != last_tick) {
+                last_tick    = tick;
+                auto trigger = false;
                 for (auto* trigger_input : trigger_inputs) {
-                    if (trigger_input->getTrigger(tick, this)) {
-                        cache_trigger = true;
-                    }
+                    trigger = trigger_input->get(tick) || trigger;
                 }
-                if (random(0, 0xFFFF) > getParam(0)) {
-                    cache_trigger = false;
-                }
+                last_value = trigger && chance > random(0, PARAM_MAX_VALUE - 1);
             }
-            return cache_trigger;
+
+            return last_value;
         }
     };
 

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../Node.h"
+#include "../NodeLink.h"
 
 namespace SparkWeaverCore {
     /**
      * @class SrTrigger
-     * @brief Outputs external triggers
+     * @brief Outputs external triggers.
      */
     class SrTrigger final : public Node {
         uint32_t next_trigger = UINT32_MAX;
@@ -13,13 +13,16 @@ namespace SparkWeaverCore {
     public:
         static const NodeConfig config;
 
-        [[nodiscard]] const NodeConfig& getConfig() const noexcept override { return config; }
+        explicit SrTrigger(const std::array<uint16_t, PARAMS_MAX_COUNT> params)
+            : Node(params)
+        {
+        }
 
-        SrTrigger() { init(); }
+        [[nodiscard]] const NodeConfig& getConfig() const noexcept override { return config; }
 
         void trigger(const uint32_t tick) noexcept override { next_trigger = tick; }
 
-        [[nodiscard]] bool getTrigger(const uint32_t tick, const Node* requested_by) noexcept override
+        [[nodiscard]] bool getTrigger(const uint32_t tick, const uint8_t index) noexcept override
         {
             return tick == next_trigger;
         }

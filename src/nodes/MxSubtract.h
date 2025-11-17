@@ -1,56 +1,33 @@
 #pragma once
 
-#include "../Node.h"
+#include "../NodeLink.h"
 
 namespace SparkWeaverCore {
     /**
      * @class MxSubtract
-     * @brief Outputs the first color/trigger minus all other color/trigger inputs
+     * @brief Outputs the first color minus all other colors.
      */
     class MxSubtract final : public Node {
-        uint32_t cache_color_tick = UINT32_MAX;
-        Color    cache_color      = Colors::BLACK;
-
-        uint32_t cache_trigger_tick = UINT32_MAX;
-        bool     cache_trigger      = false;
-
     public:
         static const NodeConfig config;
 
-        [[nodiscard]] const NodeConfig& getConfig() const noexcept override { return config; }
-
-        MxSubtract() { init(); }
-
-        [[nodiscard]] Color getColor(const uint32_t tick, const Node* requested_by) noexcept override
+        explicit MxSubtract(const std::array<uint16_t, PARAMS_MAX_COUNT> params)
+            : Node(params)
         {
-            if (tick != cache_color_tick) {
-                cache_color_tick = tick;
-                cache_color      = Colors::BLACK;
-                if (!color_inputs.empty()) {
-                    cache_color = color_inputs.at(0)->getColor(tick, this);
-                    for (int i = 1; i < color_inputs.size(); i++) {
-                        cache_color = cache_color - color_inputs.at(i)->getColor(tick, this);
-                    }
-                }
-            }
-            return cache_color;
         }
 
-        [[nodiscard]] bool getTrigger(const uint32_t tick, const Node* requested_by) noexcept override
+        [[nodiscard]] const NodeConfig& getConfig() const noexcept override { return config; }
+
+        [[nodiscard]] Color getColor(const uint32_t tick, const uint8_t index) noexcept override
         {
-            if (tick != cache_trigger_tick) {
-                cache_trigger_tick = tick;
-                cache_trigger      = false;
-                if (!trigger_inputs.empty()) {
-                    cache_trigger = trigger_inputs.at(0)->getTrigger(tick, this);
-                    for (int i = 1; i < trigger_inputs.size(); i++) {
-                        if (trigger_inputs.at(i)->getTrigger(tick, this)) {
-                            cache_trigger = false;
-                        }
-                    }
+            auto color = Colors::BLACK;
+            if (!color_inputs.empty()) {
+                color = color_inputs.at(0)->get(tick);
+                for (int i = 1; i < color_inputs.size(); i++) {
+                    color = color - color_inputs.at(i)->get(tick);
                 }
             }
-            return cache_trigger;
+            return color;
         }
     };
 
@@ -58,8 +35,8 @@ namespace SparkWeaverCore {
         TypeIds::MxSubtract,
         "Subtract",
         MAXIMUM_CONNECTIONS,
-        MAXIMUM_CONNECTIONS,
+        0,
         ColorOutputs::ENABLED,
-        TriggerOutputs::ENABLED,
+        TriggerOutputs::DISABLED,
         {});
 }

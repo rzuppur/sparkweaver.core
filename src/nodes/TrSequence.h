@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Node.h"
+#include "../NodeLink.h"
 #include "../utils/random.h"
 
 namespace SparkWeaverCore {
@@ -9,42 +9,41 @@ namespace SparkWeaverCore {
      * @brief Sends incoming triggers to a single trigger output, either sequentially or randomly.
      */
     class TrSequence final : public Node {
-        size_t   active_index     = 0;
-        uint32_t cache_tick       = UINT32_MAX;
-        bool     cache_trigger    = false;
-        bool     is_first_trigger = true;
+        uint8_t  active_index = UINT8_MAX;
+        uint32_t last_tick    = UINT32_MAX;
+        bool     last_value   = false;
 
     public:
         static const NodeConfig config;
 
+        explicit TrSequence(const std::array<uint16_t, PARAMS_MAX_COUNT> params)
+            : Node(params)
+        {
+        }
+
         [[nodiscard]] const NodeConfig& getConfig() const noexcept override { return config; }
 
-        TrSequence() { init(); }
-
-        [[nodiscard]] bool getTrigger(const uint32_t tick, const Node* requested_by) noexcept override
+        [[nodiscard]] bool getTrigger(const uint32_t tick, const uint8_t index) noexcept override
         {
-            if (tick != cache_tick) {
-                cache_tick    = tick;
-                cache_trigger = false;
+            const auto    output_random = getParam(0) == 1;
+            const uint8_t index_max = trigger_outputs_count - 1; // count > 0, otherwise getTrigger wouldn't be called
+
+            if (tick != last_tick) {
+                last_tick  = tick;
+                last_value = false;
                 for (auto* trigger_input : trigger_inputs) {
-                    if (trigger_input->getTrigger(tick, this)) {
-                        cache_trigger = true;
-                    }
+                    last_value = trigger_input->get(tick) || last_value;
                 }
-                if (cache_trigger && !trigger_outputs.empty()) {
-                    if (getParam(0) == 1) {
-                        active_index = random(0, static_cast<int>(trigger_outputs.size()) - 1);
+                if (last_value) {
+                    if (output_random) {
+                        active_index = random(0, index_max);
                     } else {
-                        if (is_first_trigger) {
-                            is_first_trigger = false;
-                            active_index     = 0;
-                        } else {
-                            active_index = (active_index + 1) % trigger_outputs.size();
-                        }
+                        active_index = active_index == UINT8_MAX ? 0 : (active_index + 1) % trigger_outputs_count;
                     }
                 }
             }
-            return cache_trigger && getTriggerOutputIndex(requested_by) == active_index;
+
+            return last_value && index == active_index;
         }
     };
 

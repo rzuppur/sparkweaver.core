@@ -1,172 +1,124 @@
+#include "Engine.h"
+
+#include <cstdint>
 #include <cstring>
 #include <set>
 
-#include "Node.h"
-#include "SparkWeaverCore.h"
+#include <utils/SafeVectorReader.h>
 
 namespace SparkWeaverCore {
-    namespace {
-        const auto node_configs = getNodeConfigs();
-
-        const NodeConfig* getConfig(const uint8_t type_id)
-        {
-            for (const auto& config : node_configs) {
-                if (config.type_id == type_id) {
-                    return &config;
-                }
-            }
-            return nullptr;
-        }
-
-        using NodeCtor = Node* (*)();
-        struct NodeFactory {
-            uint8_t  type_id;
-            NodeCtor make;
-        };
-
-        Node* makeNode(const uint8_t type_id)
-        {
-            static const std::vector<NodeFactory> node_registry{
-                {DsDmxRgb::config.type_id, []() -> Node* { return new DsDmxRgb(); }},
-                {FxBreathe::config.type_id, []() -> Node* { return new FxBreathe(); }},
-                {FxPulse::config.type_id, []() -> Node* { return new FxPulse(); }},
-                {FxStrobe::config.type_id, []() -> Node* { return new FxStrobe(); }},
-                {MxAdd::config.type_id, []() -> Node* { return new MxAdd(); }},
-                {MxSequence::config.type_id, []() -> Node* { return new MxSequence(); }},
-                {MxSubtract::config.type_id, []() -> Node* { return new MxSubtract(); }},
-                {MxSwitch::config.type_id, []() -> Node* { return new MxSwitch(); }},
-                {SrColor::config.type_id, []() -> Node* { return new SrColor(); }},
-                {SrTrigger::config.type_id, []() -> Node* { return new SrTrigger(); }},
-                {TrChance::config.type_id, []() -> Node* { return new TrChance(); }},
-                {TrCycle::config.type_id, []() -> Node* { return new TrCycle(); }},
-                {TrDelay::config.type_id, []() -> Node* { return new TrDelay(); }},
-                {TrRandom::config.type_id, []() -> Node* { return new TrRandom(); }},
-                {TrSequence::config.type_id, []() -> Node* { return new TrSequence(); }}};
-
-            for (const auto& [factory_type_id, factory_make] : node_registry) {
-                if (factory_type_id == type_id) {
-                    return factory_make();
-                }
-            }
-            return nullptr;
-        }
+    const NodeConfig* Engine::getNodeConfig(const uint8_t type_id) noexcept
+    {
+        if (const auto pair = node_registry.find(type_id); pair != node_registry.end()) return pair->second.config;
+        return nullptr;
     }
 
-    void Engine::resetNodeTree() noexcept
+    Node* Engine::makeNode(const uint8_t type_id, NodeParams params) noexcept
     {
-        for (const auto all_node : all_nodes) {
+        if (const auto pair = node_registry.find(type_id); pair != node_registry.end())
+            return pair->second.ctor(params);
+        return nullptr;
+    }
+
+    void Engine::reset() noexcept
+    {
+        for (const auto color_link : color_links)
+            delete color_link;
+        color_links.clear();
+
+        for (const auto trigger_link : trigger_links)
+            delete trigger_link;
+        trigger_links.clear();
+
+        for (const auto all_node : all_nodes)
             delete all_node;
-        }
         all_nodes.clear();
         root_nodes.clear();
+
+        current_tick = 0;
+    }
+
+    Engine::~Engine() { reset(); }
+
+    std::vector<const NodeConfig*> Engine::getNodeConfigs() noexcept
+    {
+        std::vector<const NodeConfig*> configs;
+        // ReSharper disable once CppUseElementsView
+        for (const auto& [first, second] : node_registry) {
+            configs.push_back(second.config);
+        }
+        return configs;
     }
 
     void Engine::build(const std::vector<uint8_t>& tree)
     {
-        current_tick = 0;
-        resetNodeTree();
+        reset();
 
         try {
-            int                   chr_pos     = 0;
-            uint8_t               command     = 0;
-            uint8_t               params_left = 0;
-            uint8_t               param_lsb   = 0;
-            std::vector<uint16_t> params      = {};
+            SafeVectorReader reader(tree);
 
-            for (const auto byte : tree) {
-                // CHECK VERSION
-                if (chr_pos == 0) {
-                    if (byte != TREE_VERSION) throw InvalidTreeException(chr_pos, "Incompatible tree version");
+            // Check version
+            if (!reader.hasByte()) throw InvalidTreeException(0, "Tree is empty");
+            if (reader.readByte() != TREE_VERSION)
+                throw InvalidTreeException(reader.position(), "Incompatible tree version");
+
+            // Parse commands
+            while (reader.hasByte()) {
+                if (const auto command = reader.readByte();
+                    command == CommandIds::ColorLinks || command == CommandIds::TriggerLinks) {
+                    // Get links count
+                    if (!reader.hasShort()) throw InvalidTreeException(reader.position(), "Links missing length");
+                    const auto count = reader.readShort();
+
+                    // Read links
+                    for (auto i = 0; i < count; i++) {
+                        if (!reader.hasBytes(6)) throw InvalidTreeException(reader.position(), "Link incomplete");
+                        const auto out_node_index = reader.readShort();
+                        const auto in_node_index  = reader.readShort();
+                        const auto out_index      = reader.readByte();
+                        const auto in_index       = reader.readByte();
+                        if (out_node_index >= all_nodes.size() || in_node_index >= all_nodes.size())
+                            throw InvalidTreeException(reader.position(), "Link index out of range");
+
+                        // Make link
+                        const auto p_out = all_nodes[out_node_index];
+                        const auto p_in  = all_nodes[in_node_index];
+                        if (command == CommandIds::ColorLinks)
+                            color_links.emplace_back(new NodeLinkColor(p_out, p_in, out_index, in_index));
+                        else
+                            trigger_links.emplace_back(new NodeLinkTrigger(p_out, p_in, out_index, in_index));
+                    }
+
+                } else {
+                    // Find corresponding node config
+                    const auto p_config = getNodeConfig(command);
+                    if (p_config == nullptr) throw InvalidTreeException(reader.position(), "Unknown command");
+
+                    // Read params
+                    std::array<uint16_t, PARAMS_MAX_COUNT> params = {};
+                    for (auto i = 0; i < p_config->params_count; i++) {
+                        if (!reader.hasShort()) throw InvalidTreeException(reader.position(), "Missing parameter");
+                        params[i] = reader.readShort();
+                    }
+
+                    // Make node
+                    const auto p_node = makeNode(p_config->type_id, params);
+                    all_nodes.push_back(p_node);
+
+                    // If node has no outputs add it to root nodes
+                    if (p_config->color_outputs == ColorOutputs::DISABLED &&
+                        p_config->trigger_outputs == TriggerOutputs::DISABLED)
+                        root_nodes.push_back(p_node);
                 }
-
-                // PARSE PARAMS
-                else if (params_left > 0) {
-                    // APPEND PARAM
-                    if (params_left % 2 == 0) {
-                        param_lsb = byte;
-                    } else {
-                        params.push_back(static_cast<uint16_t>(byte) << 8 | param_lsb);
-                    }
-                    --params_left;
-
-                    // EXECUTE COMMAND
-                    if (params_left == 0) {
-                        // CONNECTION
-                        if (command == CommandIds::ColorInput || command == CommandIds::TriggerInput ||
-                            command == CommandIds::ColorOutput || command == CommandIds::TriggerOutput) {
-                            const auto from = params.at(0);
-                            const auto to   = params.at(1);
-                            if (from >= all_nodes.size() || to >= all_nodes.size() || from == to) {
-                                throw InvalidTreeException(chr_pos, "Invalid connection");
-                            }
-                            if (command == CommandIds::ColorInput) {
-                                all_nodes.at(from)->addColorInput(all_nodes.at(to));
-                            } else if (command == CommandIds::ColorOutput) {
-                                all_nodes.at(from)->addColorOutput(all_nodes.at(to));
-                            } else if (command == CommandIds::TriggerInput) {
-                                all_nodes.at(from)->addTriggerInput(all_nodes.at(to));
-                            } else if (command == CommandIds::TriggerOutput) {
-                                all_nodes.at(from)->addTriggerOutput(all_nodes.at(to));
-                            }
-                        }
-
-                        // NODE
-                        else {
-                            const auto p_node = makeNode(command);
-                            const auto config = getConfig(command);
-                            if (!p_node || !config) throw InvalidTreeException(chr_pos);
-                            for (size_t i = 0; i < params.size(); i++) {
-                                p_node->setParam(i, params[i]);
-                            }
-                            all_nodes.push_back(p_node);
-                            if (config->enable_color_outputs == ColorOutputs::DISABLED &&
-                                config->enable_trigger_outputs == TriggerOutputs::DISABLED) {
-                                root_nodes.push_back(p_node);
-                            }
-                        }
-                    }
-                }
-
-                // PARSE COMMAND
-                else {
-                    params.clear();
-                    command = byte;
-
-                    // CONNECTION
-                    if (command == CommandIds::ColorInput || command == CommandIds::TriggerInput ||
-                        command == CommandIds::ColorOutput || command == CommandIds::TriggerOutput) {
-                        params_left = 2 * 2;
-                    }
-
-                    // NODE
-                    else if (const auto config = getConfig(command)) {
-                        if (config->params_count > 0) {
-                            params_left = config->params_count * 2;
-                        } else {
-                            const auto p_node = makeNode(command);
-                            if (!p_node) throw InvalidTreeException(chr_pos);
-                            all_nodes.push_back(p_node);
-                            if (config->enable_color_outputs == ColorOutputs::DISABLED &&
-                                config->enable_trigger_outputs == TriggerOutputs::DISABLED) {
-                                root_nodes.push_back(p_node);
-                            }
-                        }
-                    }
-
-                    // INVALID
-                    else
-                        throw InvalidTreeException(chr_pos, "Invalid command");
-                }
-
-                ++chr_pos;
             }
+
         } catch (...) {
-            resetNodeTree();
+            reset();
             throw;
         }
     }
 
-    [[nodiscard]] uint8_t* Engine::tick() noexcept
+    [[nodiscard]] const uint8_t* Engine::tick() noexcept
     {
         memset(dmx_data, 0, sizeof(dmx_data));
         for (const auto root_node : root_nodes) {

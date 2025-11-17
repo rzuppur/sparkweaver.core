@@ -1,26 +1,30 @@
 #pragma once
 
-#include "../Node.h"
+#include "../NodeLink.h"
 
 namespace SparkWeaverCore {
     /**
      * @class SrColor
-     * @brief Outputs a static color
+     * @brief Outputs a static color.
      */
     class SrColor final : public Node {
     public:
         static const NodeConfig config;
 
+        explicit SrColor(const std::array<uint16_t, PARAMS_MAX_COUNT> params)
+            : Node(params)
+        {
+        }
+
         [[nodiscard]] const NodeConfig& getConfig() const noexcept override { return config; }
 
-        SrColor() { init(); }
-
-        [[nodiscard]] Color getColor(const uint32_t tick, const Node* requested_by) noexcept override
+        [[nodiscard]] Color getColor(const uint32_t tick, const uint8_t index) noexcept override
         {
-            return {
-                static_cast<uint8_t>(getParam(0)),
-                static_cast<uint8_t>(getParam(1)),
-                static_cast<uint8_t>(getParam(2))};
+            const uint8_t red   = getParam(0);
+            const uint8_t green = getParam(1);
+            const uint8_t blue  = getParam(2);
+
+            return {red, green, blue};
         }
     };
 

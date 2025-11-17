@@ -1,59 +1,33 @@
 #pragma once
 
-#include "../Node.h"
+#include "../NodeLink.h"
 
 namespace SparkWeaverCore {
     /**
      * @class MxAdd
-     * @brief Outputs the sum of all input colors and/or all input triggers
+     * @brief Outputs the sum of all colors.
      */
     class MxAdd final : public Node {
-        uint32_t cache_color_tick = UINT32_MAX;
-        Color    cache_color      = Colors::BLACK;
-
-        uint32_t cache_trigger_tick = UINT32_MAX;
-        bool     cache_trigger      = false;
-
     public:
         static const NodeConfig config;
 
-        [[nodiscard]] const NodeConfig& getConfig() const noexcept override { return config; }
-
-        MxAdd() { init(); }
-
-        [[nodiscard]] Color getColor(const uint32_t tick, const Node* requested_by) noexcept override
+        explicit MxAdd(const std::array<uint16_t, PARAMS_MAX_COUNT> params)
+            : Node(params)
         {
-            if (tick != cache_color_tick) {
-                cache_color_tick = tick;
-                cache_color      = Colors::BLACK;
-                for (auto* color_input : color_inputs) {
-                    cache_color = cache_color + color_input->getColor(tick, this);
-                }
-            }
-            return cache_color;
         }
 
-        [[nodiscard]] bool getTrigger(const uint32_t tick, const Node* requested_by) noexcept override
+        [[nodiscard]] const NodeConfig& getConfig() const noexcept override { return config; }
+
+        [[nodiscard]] Color getColor(const uint32_t tick, const uint8_t index) noexcept override
         {
-            if (tick != cache_trigger_tick) {
-                cache_trigger_tick = tick;
-                cache_trigger      = false;
-                for (auto* trigger_input : trigger_inputs) {
-                    if (trigger_input->getTrigger(tick, this)) {
-                        cache_trigger = true;
-                    }
-                }
+            auto color = Colors::BLACK;
+            for (auto* color_input : color_inputs) {
+                color = color + color_input->get(tick);
             }
-            return cache_trigger;
+            return color;
         }
     };
 
-    constexpr NodeConfig MxAdd::config = NodeConfig(
-        TypeIds::MxAdd,
-        "Add",
-        MAXIMUM_CONNECTIONS,
-        MAXIMUM_CONNECTIONS,
-        ColorOutputs::ENABLED,
-        TriggerOutputs::ENABLED,
-        {});
+    constexpr NodeConfig MxAdd::config =
+        NodeConfig(TypeIds::MxAdd, "Add", MAXIMUM_CONNECTIONS, 0, ColorOutputs::ENABLED, TriggerOutputs::DISABLED, {});
 }

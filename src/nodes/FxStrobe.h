@@ -2,43 +2,41 @@
 
 #include <cstdint>
 
-#include "../Node.h"
+#include "../NodeLink.h"
 
 namespace SparkWeaverCore {
     /**
      * @class FxStrobe
-     * @brief On trigger pulse input color for specified number of ticks
+     * @brief On trigger pulse input color for specified number of ticks.
      */
     class FxStrobe final : public Node {
-        uint32_t flash_tick  = UINT32_MAX;
-        uint32_t cache_tick  = UINT32_MAX;
-        Color    cache_color = Colors::BLACK;
+        uint32_t flash_tick = UINT32_MAX;
 
     public:
         static const NodeConfig config;
 
+        explicit FxStrobe(const std::array<uint16_t, PARAMS_MAX_COUNT> params)
+            : Node(params)
+        {
+        }
+
         [[nodiscard]] const NodeConfig& getConfig() const noexcept override { return config; }
 
-        FxStrobe() { init(); }
-
-        [[nodiscard]] Color getColor(const uint32_t tick, const Node* requested_by) noexcept override
+        [[nodiscard]] Color getColor(const uint32_t tick, const uint8_t index) noexcept override
         {
-            if (tick != cache_tick) {
-                cache_tick = tick;
-                for (auto* trigger_input : trigger_inputs) {
-                    if (trigger_input->getTrigger(tick, this)) {
-                        flash_tick = tick;
-                    }
-                }
+            const auto length = getParam(0);
 
-                cache_color = Colors::BLACK;
-
-                if (!color_inputs.empty() && flash_tick != UINT32_MAX && tick >= flash_tick &&
-                    tick < flash_tick + getParam(0)) {
-                    cache_color = color_inputs.at(0)->getColor(tick, this);
+            for (auto* trigger_input : trigger_inputs) {
+                if (trigger_input->get(tick)) {
+                    flash_tick = tick;
                 }
             }
-            return cache_color;
+
+            if (color_inputs.empty()) return Colors::BLACK;
+            const auto color = color_inputs.at(0)->get(tick);
+
+            if (tick >= flash_tick && tick < flash_tick + length) return color;
+            return Colors::BLACK;
         }
     };
 

@@ -45,30 +45,37 @@ All nodes extend a common Node class and configure the allowed combination of in
 - Nodes must evaluate all inputs at every tick (otherwise delays would break, for example). Node output may be requested multiple times in a single tick.
 - Tick length is not defined but assumed to be around 24 ms, the time it takes to send one full 512-byte DMX packet. That's about 42 FPS. You can have faster updates by sending less than 512 bytes.
 
-### Tree format
+### Node tree format
 
-The first byte is the node tree format version. The rest of the tree should have a command byte followed by command parameters, if any.
+First byte is version followed by node command bytes and parameters, if any. After nodes are links between nodes.
 
-Parameters are little-endian uint16. All parameters are required.
+Node parameters are little-endian uint16. All parameters are required.
 
 ### Example
 
 Creates a orange `#FF8040` color input node and connects its color output to a DMX fixture at address 50.
 
 ```bash
-01    # version
-00    # first command (DMX output)
-32 00 # first parameter (address)
-60    # second command (Color)
-FF 00 # first parameter (red)
-80 00 # second parameter (green)
-40 00 # third parameter (blue)
-FE    # color output
-01 00 # output source node index
-00 00 # output target node index
-FC    # color input
-00 00 # input source node index
-01 00 # input target node index
+03    # version
+
+00    # first node (DMX output)
+32 00 #   first parameter (address, 50)
+
+60    # second node (Color)
+FF 00 #   first parameter (red, FF)
+80 00 #   second parameter (green, 80)
+40 00 #   third parameter (blue, 40)
+
+FE    # color links
+01 00 #   count (1)
+      # color link 1
+01 00 #   output node index (1, Color)
+00 00 #   input node index (0, DMX)
+00    #   output index (0)
+00    #   input index (0)
+
+FF    # trigger links
+00 00 #   count (0)
 ```
 
 ---

@@ -15,22 +15,22 @@ int main()
 #endif
 
     std::cout << "SparkWeaverCore\n\nNODE TYPES v" << std::to_string(SparkWeaverCore::TREE_VERSION) << "\n\n";
-    for (const auto configs = SparkWeaverCore::getNodeConfigs(); const auto& config : configs) {
+    for (const auto configs = SparkWeaverCore::Engine::getNodeConfigs(); const auto& config : configs) {
         std::cout << std::format(
-            "{:02X} {:<24} C {}{:0>2}{}   T {}{:0>2}{}\n",
-            config.type_id,
-            config.name.data(),
-            config.max_color_inputs > 0 ? "->" : "  ",
-            config.max_color_inputs,
-            config.enable_color_outputs == SparkWeaverCore::ColorOutputs::ENABLED ? "->" : "  ",
-            config.max_trigger_inputs > 0 ? "->" : "  ",
-            config.max_trigger_inputs,
-            config.enable_trigger_outputs == SparkWeaverCore::TriggerOutputs::ENABLED ? "->" : "  ");
-        for (int i = 0; i < config.params_count; i++) {
-            const auto param = config.params[i];
+            "{:02X} {:<24} C {}{:0>2}{}       T {}{:0>2}{}\n",
+            config->type_id,
+            config->name.data(),
+            config->color_inputs_max > 0 ? "->" : "  ",
+            config->color_inputs_max,
+            config->color_outputs == SparkWeaverCore::ColorOutputs::ENABLED ? "->" : "  ",
+            config->trigger_inputs_max > 0 ? "->" : "  ",
+            config->trigger_inputs_max,
+            config->trigger_outputs == SparkWeaverCore::TriggerOutputs::ENABLED ? "->" : "  ");
+        for (int i = 0; i < config->params_count; i++) {
+            const auto param = config->params[i];
             std::cout << std::format(
                 " {} {:<16} {:<12} [{}]\n",
-                i == config.params_count - 1 ? "└─" : "├─",
+                i == config->params_count - 1 ? "└─" : "├─",
                 param.name.data(),
                 std::format("{}-{}", param.min, param.max),
                 param.default_value);
@@ -52,15 +52,14 @@ int main()
              0x00,
              0x40,
              0x00,
-             SparkWeaverCore::CommandIds::ColorOutput,
+             SparkWeaverCore::CommandIds::ColorLinks,
+             0x01,
+             0x00,
              0x01,
              0x00,
              0x00,
              0x00,
-             SparkWeaverCore::CommandIds::ColorInput,
              0x00,
-             0x00,
-             0x01,
              0x00});
         const auto data = engine.tick();
         std::cout << std::format("{:02X} {:02X} {:02X} {:02X}\n", data[1], data[2], data[3], data[4]);

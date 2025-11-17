@@ -1,250 +1,89 @@
 #pragma once
 
 #include <array>
-#include <cassert>
 #include <cstdint>
-#include <iostream>
-#include <string>
-#include <utility>
 #include <vector>
 
 #include "Color.h"
+#include "Config.h"
+#include "NodeConfig.h"
 #include "utils/string.h"
 
 namespace SparkWeaverCore {
-    constexpr int      DMX_PACKET_SIZE     = 513;
-    constexpr int      MAXIMUM_CONNECTIONS = 32;
-    constexpr int      PARAMS_MAX_COUNT    = 4;
-    constexpr uint16_t PARAM_MAX_VALUE     = UINT16_MAX;
-    constexpr uint8_t  TREE_VERSION        = 0x02;
+    class NodeLinkColor;
+    class NodeLinkTrigger;
 
-    enum class ColorOutputs {
-        DISABLED,
-        ENABLED,
-    };
-
-    enum class TriggerOutputs {
-        DISABLED,
-        ENABLED,
-    };
-
-    namespace TypeIds {
-        constexpr uint8_t DsDmxRgb = 0x00;
-
-        constexpr uint8_t FxBreathe = 0x20;
-        constexpr uint8_t FxPulse   = 0x21;
-        constexpr uint8_t FxStrobe  = 0x22;
-
-        constexpr uint8_t MxAdd      = 0x40;
-        constexpr uint8_t MxSequence = 0x41;
-        constexpr uint8_t MxSubtract = 0x42;
-        constexpr uint8_t MxSwitch   = 0x43;
-
-        constexpr uint8_t SrColor   = 0x60;
-        constexpr uint8_t SrTrigger = 0x61;
-
-        constexpr uint8_t TrChance   = 0x80;
-        constexpr uint8_t TrCycle    = 0x81;
-        constexpr uint8_t TrDelay    = 0x82;
-        constexpr uint8_t TrRandom   = 0x83;
-        constexpr uint8_t TrSequence = 0x84;
-    }
-
-    namespace CommandIds {
-        constexpr uint8_t ColorInput    = 0xFC;
-        constexpr uint8_t TriggerInput  = 0xFD;
-        constexpr uint8_t ColorOutput   = 0xFE;
-        constexpr uint8_t TriggerOutput = 0xFF;
-    }
-
-    struct NodeParam {
-        std::array<char, 16> name{};
-        uint16_t             min;
-        uint16_t             max;
-        uint16_t             default_value;
-
-        constexpr NodeParam()
-            : min(0)
-            , max(0)
-            , default_value(0)
-        {
-        }
-
-        constexpr NodeParam(
-            const std::string_view _name,
-            const uint16_t         min,
-            const uint16_t         max,
-            const uint16_t         default_value)
-            : min(min)
-            , max(max)
-            , default_value(default_value)
-        {
-            copyStringToArray(_name, name);
-        }
-    };
-
-    struct NodeConfig {
-        std::array<char, 24>                    name{};
-        std::array<NodeParam, PARAMS_MAX_COUNT> params{};
-        const uint8_t                           type_id;
-        const uint8_t                           params_count;
-        const uint8_t                           max_color_inputs;
-        const uint8_t                           max_trigger_inputs;
-        const ColorOutputs                      enable_color_outputs;
-        const TriggerOutputs                    enable_trigger_outputs;
-
-        NodeConfig() = delete;
-
-        constexpr NodeConfig(
-            const uint8_t                          type_id,
-            const std::string_view                 _name,
-            const uint8_t                          max_color_inputs,
-            const uint8_t                          max_trigger_inputs,
-            const ColorOutputs                     enable_color_outputs,
-            const TriggerOutputs                   enable_trigger_outputs,
-            const std::initializer_list<NodeParam> _params)
-            : type_id(type_id)
-            , params_count(_params.size())
-            , max_color_inputs(max_color_inputs)
-            , max_trigger_inputs(max_trigger_inputs)
-            , enable_color_outputs(enable_color_outputs)
-            , enable_trigger_outputs(enable_trigger_outputs)
-        {
-            copyStringToArray(_name, name);
-            assert(params_count <= PARAMS_MAX_COUNT);
-            size_t i = 0;
-            for (const auto& param : _params) {
-                params[i++] = param;
-            }
-        }
-    };
-
+    /**
+     * @class Node
+     * @attention Node links should be set by \c NodeLink constructor and not modified later. Node should \c get all its
+     * inputs during each tick, even if they are not used. Functions that run after the initial tree build should never
+     * throw to avoid crashes in live environment.
+     */
     class Node {
         static inline NodeConfig
             default_config{0, "Empty node", 0, 0, ColorOutputs::DISABLED, TriggerOutputs::DISABLED, {}};
 
-        std::array<uint16_t, PARAMS_MAX_COUNT> params{};
+        const std::array<uint16_t, PARAMS_MAX_COUNT>
+            params{}; // Params are currently const but Nodes should support parameter changes during runtime
 
     protected:
-        // COLOR IN
-        std::vector<Node*> color_inputs;
-
-        // COLOR OUT
-        std::vector<Node*>   color_outputs;
-        [[nodiscard]] size_t getColorOutputIndex(const Node* to) const noexcept;
-
-        // TRIGGER IN
-        std::vector<Node*> trigger_inputs;
-
-        // TRIGGER OUT
-        std::vector<Node*>   trigger_outputs;
-        [[nodiscard]] size_t getTriggerOutputIndex(const Node* to) const noexcept;
+        explicit Node(const std::array<uint16_t, PARAMS_MAX_COUNT> params)
+            : params(params)
+        {
+        }
 
     public:
+        std::vector<NodeLinkColor*>   color_inputs          = {};
+        std::vector<NodeLinkTrigger*> trigger_inputs        = {};
+        uint8_t                       color_outputs_count   = 0;
+        uint8_t                       trigger_outputs_count = 0;
+
         virtual ~Node() = default;
 
         /**
-         * @brief Sets up parameters. Should be called in every derived class constructor.
+         * @brief Should be overridden by derived class to return the correct configuration.
+         * @return Node configuration
          */
-        void init() noexcept
-        {
-            auto const& config = getConfig();
-            for (size_t i = 0; i < config.params_count; i++) {
-                params[i] = config.params[i].default_value;
-            }
-        }
+        [[nodiscard]] virtual const NodeConfig& getConfig() const noexcept { return default_config; }
 
+        /**
+         * @brief Get parameter value, returns 0 if index is invalid.
+         * @param n Parameter index
+         * @return Parameter current value
+         */
         [[nodiscard]] uint16_t getParam(const size_t n) const noexcept
         {
             if (n >= getConfig().params_count) return 0;
             return params[n];
         }
 
-        void setParam(const size_t n, const uint16_t value) noexcept
-        {
-            const auto config = getConfig();
-            if (n >= config.params_count) return;
-            if (value < config.params[n].min || value > config.params[n].max) return;
-            params[n] = value;
-        }
-
         /**
-         * @brief Should be overridden by derived class to return the correct configuration
+         * @brief Get color output value.
+         * @param tick Current tick
+         * @param index Output link index
+         * @return Color value
          */
-        [[nodiscard]] virtual const NodeConfig& getConfig() const noexcept { return default_config; }
-
-        [[nodiscard]] uint8_t getTypeId() const noexcept { return getConfig().type_id; }
-
-        [[nodiscard]] std::string getName() const noexcept { return {getConfig().name.data()}; }
-
-        [[nodiscard]] virtual Color getColor(uint32_t tick, const Node* requested_by) noexcept { return Colors::BLACK; }
-
-        [[nodiscard]] virtual bool getTrigger(uint32_t tick, const Node* requested_by) noexcept { return false; }
+        [[nodiscard]] virtual Color getColor(uint32_t tick, const uint8_t index) noexcept { return Colors::BLACK; }
 
         /**
-         * @brief Send external trigger.
+         * @brief Get trigger output value.
+         * @param tick Current tick
+         * @param index Output link index
+         * @return Trigger value
+         */
+        [[nodiscard]] virtual bool getTrigger(uint32_t tick, const uint8_t index) noexcept { return false; }
+
+        /**
+         * @brief Trigger node from external source.
          * @param tick Current tick number
          */
         virtual void trigger(uint32_t tick) noexcept {}
 
         /**
-         * @brief Evaluate the node tree and render it to a DMX data array.
+         * @brief Evaluate all node inputs and render node output to a DMX packet.
          * @param tick Current tick number
          * @param p_dmx_data Pointer to 513 bytes long array corresponding to DMX addresses, first byte is unused
          */
         virtual void render(uint32_t tick, uint8_t* p_dmx_data) noexcept {}
-
-        /** @throws InvalidConnectionException */
-        void addColorInput(Node* input);
-
-        /** @throws InvalidConnectionException */
-        void addColorOutput(Node* output);
-
-        /** @throws InvalidConnectionException */
-        void addTriggerInput(Node* input);
-
-        /** @throws InvalidConnectionException */
-        void addTriggerOutput(Node* output);
-    };
-
-    class InvalidConnectionException final : public std::exception {
-        std::string message;
-
-    public:
-        InvalidConnectionException(const std::string& nodeName, const std::string& errorMessage)
-            : message("Invalid connection to " + nodeName + ": " + errorMessage)
-        {
-        }
-
-        [[nodiscard]] const char* what() const noexcept override { return message.c_str(); }
-    };
-
-    class InvalidParameterException final : public std::exception {
-        std::string message;
-
-    public:
-        InvalidParameterException(const std::string& nodeName, const std::string& errorMessage)
-            : message("Invalid parameter for " + nodeName + ": " + errorMessage)
-        {
-        }
-
-        [[nodiscard]] const char* what() const noexcept override { return message.c_str(); }
-    };
-
-    class InvalidTreeException final : public std::exception {
-        std::string message;
-
-    public:
-        explicit InvalidTreeException(const int chr_pos, const std::string& errorMessage)
-            : message("Tree @ " + std::to_string(chr_pos) + ": " + errorMessage)
-        {
-        }
-
-        explicit InvalidTreeException(const int chr_pos)
-            : message("Tree @ " + std::to_string(chr_pos) + ": Error")
-        {
-        }
-
-        [[nodiscard]] const char* what() const noexcept override { return message.c_str(); }
     };
 }
