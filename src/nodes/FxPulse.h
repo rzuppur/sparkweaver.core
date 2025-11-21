@@ -24,27 +24,26 @@ namespace SparkWeaverCore {
 
         [[nodiscard]] Color getColor(const uint32_t tick, const uint8_t index) noexcept override
         {
-            const auto attack           = getParam(0);
-            const auto sustain          = getParam(1);
-            const auto decay            = getParam(2);
-            const auto retrigger        = getParam(3);
-            const auto relative_tick    = tick - pulse_tick;
-            const auto retrigger_ignore = !retrigger && tick >= pulse_tick && attack + sustain + decay > relative_tick;
+            const auto attack    = getParam(0);
+            const auto sustain   = getParam(1);
+            const auto decay     = getParam(2);
+            const auto retrigger = getParam(3);
 
             for (auto* trigger_input : trigger_inputs) {
-                if (trigger_input->get(tick)) {
-                    if (!retrigger_ignore) pulse_tick = tick;
+                if (trigger_input->get(tick) &&
+                    (retrigger || pulse_tick == UINT32_MAX || pulse_tick + attack + sustain + decay <= tick)) {
+                    pulse_tick = tick;
                 }
             }
 
-            if (color_inputs.empty()) return Colors::BLACK;
-            const auto color = color_inputs.at(0)->get(tick);
-
-            if (tick < pulse_tick || tick >= pulse_tick + attack + sustain + decay) return Colors::BLACK;
-            if (relative_tick < attack) return color * (static_cast<float>(relative_tick) / static_cast<float>(attack));
-            if (relative_tick < attack + sustain) return color;
-            if (relative_tick < attack + sustain + decay)
-                return color * (1 - static_cast<float>(relative_tick - attack - sustain) / static_cast<float>(decay));
+            if (const auto phase = tick - pulse_tick;
+                pulse_tick != UINT32_MAX && !color_inputs.empty() && phase < attack + sustain + decay) {
+                const auto color = color_inputs.at(0)->get(tick);
+                if (phase < attack) return color * (static_cast<float>(phase) / static_cast<float>(attack));
+                if (phase < attack + sustain) return color;
+                if (phase < attack + sustain + decay)
+                    return color * (1 - static_cast<float>(phase - attack - sustain) / static_cast<float>(decay));
+            }
             return Colors::BLACK;
         }
     };
